@@ -34,18 +34,43 @@
 - **Plan**: `Free` (or paid for production)
 
 ## Step 4: Add Environment Variables
-In the "Environment" section, add:
+In the "Environment" section, add the following variables:
+
+**Reference `.env.example` for structure, but use your actual values:**
 
 ```
 NODE_ENV              production
 NODE_VERSION          22.22.2
-DATABASE_URL          (will add in step 6)
-JWT_PRIVATE_KEY       (your JWT private key)
-JWT_PUBLIC_KEY        (your JWT public key)
-NEXTAUTH_SECRET       (generate: openssl rand -base64 32)
-NEXTAUTH_URL          (will auto-populate from Render URL)
-API_URL               (will auto-populate from Render URL)
+DATABASE_URL          (Render will auto-generate after PostgreSQL is created)
+JWT_PRIVATE_KEY       (Copy from your local .env.local)
+JWT_PUBLIC_KEY        (Copy from your local .env.local)
+NEXTAUTH_SECRET       (Generate new: openssl rand -base64 32)
+NEXTAUTH_URL          https://esign-platform.onrender.com
+API_URL               https://esign-platform.onrender.com
 ```
+
+**How to get these values:**
+
+1. **JWT Keys**: Copy from your local `.env.local` file
+   ```bash
+   cat .env.local | grep JWT_PRIVATE_KEY
+   cat .env.local | grep JWT_PUBLIC_KEY
+   ```
+
+2. **NEXTAUTH_SECRET**: Generate new
+   ```bash
+   openssl rand -base64 32
+   ```
+
+3. **DATABASE_URL**: Will be provided by Render after PostgreSQL is created (see Step 5)
+
+**Quick Setup (Copy-Paste Method):**
+Rather than `.env.example`, grab your values from `.env.local`:
+- Open `.env.local` in your local repository
+- Copy `JWT_PRIVATE_KEY` value → Paste into Render
+- Copy `JWT_PUBLIC_KEY` value → Paste into Render
+- Generate and copy `NEXTAUTH_SECRET` → Paste into Render
+- Wait for PostgreSQL creation, then add `DATABASE_URL`
 
 ## Step 5: Create PostgreSQL Database
 1. In Render dashboard, click "New +"
