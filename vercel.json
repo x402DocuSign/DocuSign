@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm turbo build",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "projects": [
+    {
+      "name": "web",
+      "path": "apps/web",
+      "framework": "nextjs"
+    },
+    {
+      "name": "docs",
+      "path": "apps/docs",
+      "framework": "nextjs"
+    },
+    {
+      "name": "api",
+      "path": "apps/api",
+      "framework": "nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "JWT_EXPIRES_IN": {
+      "value": "7d"
+    },
+    "REFRESH_TOKEN_EXPIRES_IN": {
+      "value": "30d"
+    }
+  },
+  "ignoreCommand": "git diff --quiet HEAD~1 HEAD -- . || true"
+}

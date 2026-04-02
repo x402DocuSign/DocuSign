@@ -1,0 +1,327 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────
+// USERS & TEAMS
+// ─────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  OWNER
+  MEMBER
+  VIEWER
+}
+
+enum PlanType {
+  FREE
+  SINGLE
+  TEAM
+  ENTERPRISE
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  avatarUrl         String?
+  role              Role      @default(MEMBER)
+  plan              PlanType  @default(FREE)
+  isVerified        Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  totpSecret        String?   // AES-256 encrypted
+  totpEnabled       Boolean   @default(false)
+  totpVerified      Boolean   @default(false)
+  lastLoginAt       DateTime?
+  passwordResetToken String?
+  passwordResetExpiry DateTime?
+  emailVerifyToken  String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  teamMembers       TeamMember[]
+  documents         Document[]
+  signatures        Signature[]
+  payments          Payment[]
+  sessions          Session[]
+  auditLogs         AuditLog[]
+  apiKeys           ApiKey[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Team {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  plan        PlanType  @default(FREE)
+  maxMembers  Int       @default(5)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  members     TeamMember[]
+  documents   Document[]
+  payments    Payment[]
+  subscriptions Subscription[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      Role     @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+// ─────────────────────────────────────────
+// DOCUMENTS & SIGNATURES
+// ─────────────────────────────────────────
+
+enum DocumentStatus {
+  DRAFT
+  PENDING_SIGNATURE
+  PARTIALLY_SIGNED
+  SIGNED
+  EXPIRED
+  CANCELLED
+}
+
+enum SignatureStatus {
+  PENDING
+  SIGNED
+  DECLINED
+  EXPIRED
+}
+
+model Document {
+  id              String          @id @default(cuid())
+  title           String
+  description     String?
+  fileName        String
+  fileSize        Int
+  mimeType        String          @default("application/pdf")
+  s3Key           String          @unique  // encrypted path in S3
+  s3SignedKey     String?         // key for signed version
+  sha3Hash        String          // SHA-3 hash of original file
+  aesEncrypted    Boolean         @default(true)
+  status          DocumentStatus  @default(DRAFT)
+  expiresAt       DateTime?
+  uploadedById    String
+  teamId          String?
+  metadata        Json?           // additional metadata
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  uploadedBy      User            @relation(fields: [uploadedById], references: [id])
+  team            Team?           @relation(fields: [teamId], references: [id])
+  signatures      Signature[]
+  payments        Payment[]
+  auditLogs       AuditLog[]
+  signingFields   SigningField[]
+
+  @@index([uploadedById, status])
+  @@index([teamId])
+  @@map("documents")
+}
+
+model SigningField {
+  id          String    @id @default(cuid())
+  documentId  String
+  signerId    String?
+  fieldType   String    // signature, initials, date, text
+  page        Int
+  x           Float
+  y           Float
+  width       Float
+  height      Float
+  required    Boolean   @default(true)
+  label       String?
+  createdAt   DateTime  @default(now())
+
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("signing_fields")
+}
+
+model Signature {
+  id              String          @id @default(cuid())
+  documentId      String
+  signerId        String
+  signatureData   String?         // Base64 encoded signature image (encrypted)
+  certificate     String?         // RSA-2048 certificate (PEM)
+  rsaSignature    String?         // RSA signature of document hash
+  sha3HashAtSign  String          // SHA-3 hash at time of signing
+  ipAddress       String
+  userAgent       String?
+  geoLocation     String?
+  status          SignatureStatus  @default(PENDING)
+  signedAt        DateTime?
+  declinedReason  String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  document        Document        @relation(fields: [documentId], references: [id])
+  signer          User            @relation(fields: [signerId], references: [id])
+
+  @@index([documentId, status])
+  @@map("signatures")
+}
+
+// ─────────────────────────────────────────
+// PAYMENTS & SUBSCRIPTIONS
+// ─────────────────────────────────────────
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  SINGLE_SIGN
+  SUBSCRIPTION
+  TEAM_PACKAGE
+}
+
+model Payment {
+  id              String          @id @default(cuid())
+  userId          String
+  teamId          String?
+  documentId      String?
+  type            PaymentType
+  status          PaymentStatus   @default(PENDING)
+  amount          String          // in ETH/USDC string
+  currency        String          @default("ETH")
+  txHash          String?         // blockchain tx hash
+  walletAddress   String?         // payer wallet
+  x402PaymentId   String?         // X402 payment reference
+  idempotencyKey  String          @unique
+  metadata        Json?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id])
+  team            Team?           @relation(fields: [teamId], references: [id])
+  document        Document?       @relation(fields: [documentId], references: [id])
+
+  @@index([userId, status])
+  @@index([txHash])
+  @@map("payments")
+}
+
+model Subscription {
+  id              String    @id @default(cuid())
+  teamId          String
+  plan            PlanType
+  status          String    @default("active")
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  signaturesUsed  Int       @default(0)
+  signaturesLimit Int       @default(100)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  team            Team      @relation(fields: [teamId], references: [id])
+
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────
+// AUTH & SECURITY
+// ─────────────────────────────────────────
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  refreshToken String  @unique
+  ipAddress   String?
+  userAgent   String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@map("sessions")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  keyHash     String    @unique  // hashed API key
+  prefix      String    // first 8 chars for lookup
+  permissions String[]
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@map("api_keys")
+}
+
+// ─────────────────────────────────────────
+// AUDIT LOGS
+// ─────────────────────────────────────────
+
+enum AuditAction {
+  USER_REGISTER
+  USER_LOGIN
+  USER_LOGOUT
+  USER_MFA_ENABLED
+  USER_MFA_VERIFIED
+  DOCUMENT_UPLOADED
+  DOCUMENT_SIGNED
+  DOCUMENT_VIEWED
+  DOCUMENT_DOWNLOADED
+  DOCUMENT_DELETED
+  PAYMENT_INITIATED
+  PAYMENT_COMPLETED
+  PAYMENT_FAILED
+  API_KEY_CREATED
+  API_KEY_REVOKED
+  TEAM_CREATED
+  TEAM_MEMBER_ADDED
+  TEAM_MEMBER_REMOVED
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_CANCELLED
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  documentId  String?
+  action      AuditAction
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+
+  user        User?       @relation(fields: [userId], references: [id])
+  document    Document?   @relation(fields: [documentId], references: [id])
+
+  @@index([userId, action])
+  @@index([documentId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
