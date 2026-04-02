@@ -32,7 +32,7 @@ A complete electronic signature platform with blockchain payments, document mana
 
 ### Infrastructure
 - **Monorepo**: pnpm 9 workspaces + Turbo
-- **Deployment**: [Fly.io](https://fly.io) (recommended) / Vercel / Railway
+- **Deployment**: GitHub Pages (frontend) + custom backend server
 - **Build**: Nixpacks (auto-detects pnpm)
 
 ## Project Structure 📁
@@ -141,39 +141,63 @@ pnpm turbo build      # Build for production
 
 ## Deployment 🌐
 
-### Fly.io (Recommended for Monorepos)
+### GitHub Pages (Frontend)
+
+Frontend automatically deploys to GitHub Pages on every push to `main`:
 
 ```bash
-npm install -g flyctl
-fly auth login
-fly launch
-fly secrets set JWT_PRIVATE_KEY="..." JWT_PUBLIC_KEY="..."
-fly deploy
+# Push to main branch
+git push origin main
+
+# GitHub Actions automatically:
+# 1. Builds the Next.js frontend
+# 2. Deploys to GitHub Pages
+# 3. Available at: https://Pixeeee.github.io/DocuSign
 ```
 
-See [FLY_DEPLOYMENT.md](./FLY_DEPLOYMENT.md) for detailed guide.
+**Workflow details**: [.github/workflows/github-pages.yml](.github/workflows/github-pages.yml)
 
-### Render (Recommended for Simplicity)
+### Backend Deployment
 
-1. Go to [render.com](https://render.com)
-2. Connect GitHub repo
-3. Select "Deploy from render.yaml"
-4. Add environment variables
-5. Deploy!
+For the backend API, you have several options:
 
-See [RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md) for detailed guide.
+**Option 1: GitHub Actions + SSH (Recommended)**
 
-**Free tier**: Web service sleeps after 15 minutes, PostgreSQL can spin down after 90 days.
+Set up GitHub secrets for auto-deployment:
+1. Go to **Settings → Secrets and Variables → Actions**
+2. Add secrets: `SERVER_HOST`, `SERVER_USER`, `SERVER_SSH_KEY`
+3. Push to main → Auto-deploys via `.github/workflows/deploy.yml`
 
-### Vercel
+**Option 2: Manual Server Deployment**
 
+Run on your server:
 ```bash
-vercel --prod
+cd ~/esign-platform
+git pull origin main
+pnpm install --frozen-lockfile && pnpm turbo build
+pm2 restart esign-platform
 ```
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed guide.
+See workflow: [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
 
-**Note**: Vercel free tier has 100 deployments/24hr limit.
+---
+
+## Architecture 📐
+
+```
+┌─────────────────────────────────────────┐
+│     GitHub Pages (Frontend)             │
+│  https://Pixeeee.github.io/DocuSign     │
+│  (Auto-deployed on git push)            │
+└────────────┬────────────────────────────┘
+             │ API calls
+             ↓
+┌─────────────────────────────────────────┐
+│     Your Server (Backend API)           │
+│     http://your-domain.com/api/*        │
+│     (Express.js + PostgreSQL)           │
+└─────────────────────────────────────────┘
+```
 
 ## API Endpoints 🔌
 
@@ -251,52 +275,12 @@ psql $DATABASE_URL
 
 ## License 📄
 
-MIT License - See LICENSE file
+MIT License
 
 ## Support 💬
 
 - Issues: [GitHub Issues](https://github.com/Pixeeee/DocuSign/issues)
-- Discussions: [GitHub Discussions](https://github.com/Pixeeee/DocuSign/discussions)
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+- Questions: [GitHub Discussions](https://github.com/Pixeeee/DocuSign/discussions)
 
 You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
 
