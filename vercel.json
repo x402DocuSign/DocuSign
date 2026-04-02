@@ -1,35 +1,39 @@
 {
   "version": 2,
-  "buildCommand": "pnpm turbo build",
-  "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "projects": [
+  "builds": [
     {
-      "name": "web",
-      "path": "apps/web",
-      "framework": "nextjs"
+      "src": "apps/web/package.json",
+      "use": "@vercel/next"
     },
     {
-      "name": "docs",
-      "path": "apps/docs",
-      "framework": "nextjs"
+      "src": "apps/docs/package.json",
+      "use": "@vercel/next"
     },
     {
-      "name": "api",
-      "path": "apps/api",
-      "framework": "nodejs"
+      "src": "apps/api/package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "apps/api/$1"
+    },
+    {
+      "src": "/docs/(.*)",
+      "dest": "apps/docs/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "apps/web/$1"
     }
   ],
   "env": {
-    "NODE_ENV": {
-      "value": "production"
-    },
-    "JWT_EXPIRES_IN": {
-      "value": "7d"
-    },
-    "REFRESH_TOKEN_EXPIRES_IN": {
-      "value": "30d"
-    }
+    "NODE_ENV": "production",
+    "JWT_EXPIRES_IN": "7d",
+    "REFRESH_TOKEN_EXPIRES_IN": "30d"
   },
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm turbo build",
   "ignoreCommand": "git diff --quiet HEAD~1 HEAD -- . || true"
 }
