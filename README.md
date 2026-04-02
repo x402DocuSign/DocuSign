@@ -141,31 +141,29 @@ pnpm turbo build      # Build for production
 
 ## Deployment 🌐
 
-### Fly.io (Recommended)
+### Fly.io (Recommended for Monorepos)
 
 ```bash
-# Install Flyctl
 npm install -g flyctl
-
-# Login
 fly auth login
-
-# Launch (creates PostgreSQL automatically)
 fly launch
-
-# Set environment variables
 fly secrets set JWT_PRIVATE_KEY="..." JWT_PUBLIC_KEY="..."
-
-# Deploy
 fly deploy
-
-# View logs
-fly logs
 ```
 
-**URL**: https://esign-platform.fly.dev
-
 See [FLY_DEPLOYMENT.md](./FLY_DEPLOYMENT.md) for detailed guide.
+
+### Render (Recommended for Simplicity)
+
+1. Go to [render.com](https://render.com)
+2. Connect GitHub repo
+3. Select "Deploy from render.yaml"
+4. Add environment variables
+5. Deploy!
+
+See [RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md) for detailed guide.
+
+**Free tier**: Web service sleeps after 15 minutes, PostgreSQL can spin down after 90 days.
 
 ### Vercel
 
@@ -175,9 +173,7 @@ vercel --prod
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed guide.
 
-### Railway & Others
-
-Railway auto-detects the monorepo - just connect GitHub repo and deploy.
+**Note**: Vercel free tier has 100 deployments/24hr limit.
 
 ## API Endpoints 🔌
 

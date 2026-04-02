@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: esign-platform
+    env: node
+    plan: free
+    buildCommand: pnpm install --frozen-lockfile && pnpm turbo build
+    startCommand: pnpm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.2
+      - key: NODE_ENV
+        value: production
+    envVarRefs:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${RENDER_EXTERNAL_URL}
+      API_URL: ${RENDER_EXTERNAL_URL}
+
+  - type: pserv
+    name: esign-postgres
+    plan: free
+    ipAllowList: []
+    maxClientConnections: 20
+    postgresMajorVersion: 16
