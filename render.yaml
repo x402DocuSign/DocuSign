@@ -27,5 +27,6 @@ services:
 
   - type: pserv
     name: esign-postgres
+    runtime: postgres
     plan: free
     ipAllowList: []
