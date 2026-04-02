@@ -11,10 +11,5 @@
     { "src": "/(.*)", "dest": "apps/web/$1" }
   ],
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm turbo build",
-  "env": {
-    "NODE_ENV": "production",
-    "JWT_EXPIRES_IN": "7d",
-    "REFRESH_TOKEN_EXPIRES_IN": "30d"
-  }
+  "buildCommand": "pnpm turbo build"
 }
