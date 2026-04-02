@@ -8,8 +8,6 @@ overrides:
   glob: '>=10.5.0'
   next: '>=15.0.8'
 
-pnpmfileChecksum: mlkhkn2jyloughogekx3r7r7pe
-
 importers:
 
   .:
