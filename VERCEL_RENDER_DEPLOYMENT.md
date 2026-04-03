@@ -59,7 +59,12 @@ https://your-app.vercel.app → https://your-api.onrender.com → PostgreSQL 16
 
 ---
 
-## Part 1: Deploy Backend to Render
+## Part 1: Deploy Backend to Render (BACKEND ONLY)
+
+**Important**: This deployment is for the BACKEND API ONLY.
+- Render builds and runs: `@esign/api` (and its dependencies)
+- Frontend (Next.js web app) is deployed separately to Vercel
+- The API will open port 3001 for frontend to connect to
 
 ### Step 1.1: Go to Render
 1. Visit https://render.com
@@ -82,23 +87,26 @@ https://your-app.vercel.app → https://your-api.onrender.com → PostgreSQL 16
    - **Branch**: `main`
 
 ### Step 1.3: Verify Settings (Do NOT Edit These)
-**✅ Build Command field should be EMPTY or greyed out**
-- Render is using render.yaml blueprint
-- DO NOT manually enter anything
-- If you see an editable field with `pnpm` command → Wrong mode, go back
+**✅ Build Command field - Auto-detected from render.yaml:**
+```
+NODE_ENV=development pnpm install --frozen-lockfile && NODE_ENV=production pnpm run build
+```
+- Installs all tools (development mode)
+- Builds ONLY backend (@esign/api + @esign/db)
+- Frontend (web, docs) are NOT built for Render
 
-**✅ Start Command field should be EMPTY or greyed out**
-- render.yaml has `startCommand: pnpm run start`
+**✅ Start Command field - Auto-detected from render.yaml:**
+```
+pnpm --filter @esign/api start
+```
+- Starts ONLY the API server
+- Listens on port 3001
+- Frontend is deployed separately to Vercel
 
-**✅ Root Directory field should be EMPTY**
-- Monorepo structure handled by render.yaml automatically
-
-**What render.yaml will do:**
-- Install: `pnpm install --frozen-lockfile`
-- Generate Prisma: `pnpm --filter @esign/db prisma generate`
-- Build: `NODE_OPTIONS="--max-old-space-size=320" pnpm --filter @esign/api build`
-- Start: `pnpm run start`
-- Total: Backend-only deployment, 320MB memory, no frontend build
+**✅ Frontend Note:**
+- This Render deployment is BACKEND ONLY
+- The web app, docs, and other frontend apps are NOT built here
+- Deploy frontend separately to Vercel (see Part 2)
 
 ### Step 1.4: Add Environment Variables
 
@@ -406,7 +414,37 @@ Each optimized for their platform
 
 ---
 
-### ❌ "Database connection error" or "ECONNREFUSED"
+### ❌ "Port scan timeout - No open ports detected" Error (FIXED)
+**Root Cause**: Render was trying to start all packages (turbo start), not just the API
+
+**✅ FIXED**: render.yaml now explicitly runs:
+```
+startCommand: pnpm --filter @esign/api start
+```
+- Only starts `@esign/api` (not frontend, docs, etc.)
+- API opens port 3001 and Render detects it
+- No more timeout errors
+
+**If you still see this error:**
+1. **Pull latest changes:**
+   ```bash
+   git pull origin main
+   ```
+2. **Delete old Render service and redeploy**
+   - Render dashboard → esign-api → Settings → Danger Zone → Delete
+   - Create new Web Service
+
+**Expected deployment logs:**
+```
+==> Running build command '...'
+[Builds backend packages]
+==> Build successful 🎉
+==> Deploying...
+[Starts pnpm --filter @esign/api start]
+Listening on port 3001
+```
+
+---
 **Root Cause**: PostgreSQL service name doesn't match or region mismatch
 
 **Fix:**
