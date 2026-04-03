@@ -27,9 +27,10 @@ https://your-app.vercel.app → https://your-api.onrender.com → PostgreSQL 16
    - **Branch**: `main`
 
 ### Step 1.3: Build & Start Commands
-Leave these as default (Render will auto-detect from `render.yaml`):
-- **Build Command**: `pnpm install --frozen-lockfile && pnpm --filter @esign/db prisma generate && NODE_OPTIONS="--max-old-space-size=256" pnpm --filter @esign/web build && NODE_OPTIONS="--max-old-space-size=256" pnpm --filter @esign/api build`
-- **Start Command**: `pnpm run start`
+Render **automatically detects** from `render.yaml` - **no manual setup needed!**
+- ✅ Leave "Build Command" blank (auto-detected)
+- ✅ Leave "Start Command" blank (auto-detected)
+- ✅ Leave "Root Directory" blank (monorepo handled by render.yaml)
 
 ### Step 1.4: Add Environment Variables
 
