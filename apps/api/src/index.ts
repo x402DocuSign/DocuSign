@@ -3,16 +3,23 @@ import 'express-async-errors'
 import dotenv from 'dotenv'
 import path from 'path'
 
+// Try to load from .env.local (local development)
+// On Render/production, env vars are provided by the platform
 const envPath = path.join(process.cwd(), '.env.local')
 const envResult = dotenv.config({ path: envPath })
 
 console.log(`[dotenv] Loading from: ${envPath}`)
 console.log(`[dotenv] DATABASE_URL set: ${!!process.env.DATABASE_URL}`)
+console.log(`[dotenv] Environment: ${process.env.NODE_ENV || 'development'}`)
 console.log(`[dotenv] Parsed keys: ${Object.keys(envResult.parsed || {}).join(', ')}`)
 
-if (!envResult.parsed || !envResult.parsed.DATABASE_URL) {
-  console.error('❌ CRITICAL: DATABASE_URL not found in .env.local!')
-  console.error(`Tried path: ${envPath}`)
+// Check if DATABASE_URL is available (from .env.local or Render environment)
+if (!process.env.DATABASE_URL) {
+  console.error('❌ CRITICAL: DATABASE_URL not found!')
+  if (envResult.error) {
+    console.error(`   .env.local not found (expected on Render/production): ${envResult.error.message}`)
+  }
+  console.error('   Set DATABASE_URL environment variable and try again.')
   process.exit(1)
 }
 
