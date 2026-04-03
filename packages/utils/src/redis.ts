@@ -1,25 +1,46 @@
 import Redis from 'ioredis'
 
 let redisClient: Redis | null = null
+let redisAvailable = false
 
 export function getRedis(): Redis {
   if (!redisClient) {
-    redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-      password: process.env.REDIS_PASSWORD,
-      maxRetriesPerRequest: 3,
-      retryStrategy: (times: number) => Math.min(times * 100, 3000),
-      lazyConnect: false,
-    })
+    try {
+      redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+        password: process.env.REDIS_PASSWORD,
+        maxRetriesPerRequest: 3,
+        retryStrategy: (times: number) => {
+          if (times > 3) {
+            console.warn('[Redis] Redis unavailable after 3 retries, will use in-memory fallback')
+            redisAvailable = false
+            return null // Stop retrying
+          }
+          return Math.min(times * 100, 3000)
+        },
+        lazyConnect: false,
+        enableReadyCheck: false,
+        enableOfflineQueue: false,
+      })
 
-    redisClient.on('error', (err: Error) => {
-      console.error('[Redis] Connection error:', err.message)
-    })
+      redisClient.on('error', (err: Error) => {
+        redisAvailable = false
+        console.warn('[Redis] Connection error (will use fallback):', err.message)
+      })
 
-    redisClient.on('connect', () => {
-      console.log('[Redis] Connected successfully')
-    })
+      redisClient.on('connect', () => {
+        redisAvailable = true
+        console.log('[Redis] Connected successfully')
+      })
+    } catch (err) {
+      console.warn('[Redis] Failed to create client, will use in-memory fallback')
+      redisAvailable = false
+    }
   }
-  return redisClient
+  return redisClient as Redis
+}
+
+export function isRedisAvailable(): boolean {
+  return redisAvailable && redisClient !== null
 }
 
 // ─── Session helpers ───────────────────────────────────────────

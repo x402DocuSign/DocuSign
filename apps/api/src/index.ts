@@ -47,7 +47,7 @@ import helmet from 'helmet'
 import compression from 'compression'
 import { rateLimit } from 'express-rate-limit'
 import { RedisStore } from 'rate-limit-redis'
-import { getRedis } from '@esign/utils/redis'
+import { getRedis, isRedisAvailable } from '@esign/utils/redis'
 import { logger } from '@esign/utils/logger'
 
 const app = express() as any
@@ -99,31 +99,40 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 const redis = getRedis()
 
-const globalLimiter = rateLimit({
+// Use Redis store if available, otherwise use in-memory (default)
+const globalLimiterConfig: any = {
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 min
   max: parseInt(process.env.RATE_LIMIT_MAX || '100'),
   standardHeaders: 'draft-7',
   legacyHeaders: false,
-  store: new RedisStore({
-    // accept any args and forward to redis.call; cast to any to avoid TS spread tuple restrictions
-    sendCommand: (...args: any[]) => (redis.call as any)(...args) as any,
-  }),
   message: {
     error: 'Too many requests. Please try again later.',
     retryAfter: 15,
   },
-})
+}
 
-const authLimiter = rateLimit({
+if (isRedisAvailable()) {
+  globalLimiterConfig.store = new RedisStore({
+    sendCommand: (...args: any[]) => (redis.call as any)(...args) as any,
+  })
+}
+
+const globalLimiter = rateLimit(globalLimiterConfig)
+
+const authLimiterConfig: any = {
   windowMs: 15 * 60 * 1000,
   max: 10,
-  store: new RedisStore({
-    // accept any args and forward to redis.call; cast to any to avoid TS spread tuple restrictions
+  message: { error: 'Too many authentication attempts. Please try again in 15 minutes.' },
+}
+
+if (isRedisAvailable()) {
+  authLimiterConfig.store = new RedisStore({
     sendCommand: (...args: any[]) => (redis.call as any)(...args) as any,
     prefix: 'rl:auth:',
-  }),
-  message: { error: 'Too many authentication attempts. Please try again in 15 minutes.' },
-})
+  })
+}
+
+const authLimiter = rateLimit(authLimiterConfig)
 
 app.use('/api/', globalLimiter as any)
 app.use('/api/auth/', authLimiter as any)
