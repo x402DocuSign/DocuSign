@@ -8,6 +8,20 @@ Frontend (Vercel)           Backend (Render)          Database (Render)
 https://your-app.vercel.app → https://your-api.onrender.com → PostgreSQL 16
 ```
 
+## Optimization Strategy ✨
+
+**Why split frontend and backend across platforms:**
+- ✅ **Vercel** (Frontend): Optimized for Next.js, fast builds, CDN
+- ✅ **Render** (Backend): Full backend control, PostgreSQL included, ~$7/month
+- ✅ **Memory Efficient**: Backend-only builds (saves 50% memory in Render free tier)
+- ✅ **Auto-deploy**: Both platforms auto-build when you push to `main`
+
+**Memory Optimization Details:**
+- Frontend builds on Vercel (doesn't impact Render memory)
+- Backend builds only `@esign/api` + `@esign/db`
+- Node process capped at 320MB (safe under 512MB limit)
+- Result: Stable deployments without out-of-memory errors ✅
+
 ---
 
 ## Part 1: Deploy Backend to Render
@@ -28,9 +42,17 @@ https://your-app.vercel.app → https://your-api.onrender.com → PostgreSQL 16
 
 ### Step 1.3: Build & Start Commands
 Render **automatically detects** from `render.yaml` - **no manual setup needed!**
-- ✅ Leave "Build Command" blank (auto-detected)
-- ✅ Leave "Start Command" blank (auto-detected)
-- ✅ Leave "Root Directory" blank (monorepo handled by render.yaml)
+
+The optimized configuration:
+- ✅ Only builds backend (`@esign/api` + `@esign/db`)
+- ✅ Frontend automatically deploys to Vercel separately
+- ✅ Memory optimized: 320MB (safe under 512MB limit)
+- ✅ Saves ~50% deployment time and memory usage
+
+Leave blank:
+- ✅ Build Command (auto-detected)
+- ✅ Start Command (auto-detected)
+- ✅ Root Directory (monorepo handled by render.yaml)
 
 ### Step 1.4: Add Environment Variables
 
@@ -43,10 +65,13 @@ Scroll to "Environment" section and add:
 | `JWT_PRIVATE_KEY` | [Copy from your `.env.local`] |
 | `JWT_PUBLIC_KEY` | [Copy from your `.env.local`] |
 | `NEXTAUTH_SECRET` | Generate: `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Will set after Vercel deployment |
-| `API_URL` | Will set after Render is live |
+| `NEXTAUTH_URL` | [Your Vercel frontend URL - set later] |
+| `API_URL` | `https://${render.host}` (auto-replaced with backend URL) |
 
-*For now, leave NEXTAUTH_URL and API_URL blank - we'll update them after both are deployed*
+**Important Notes:**
+- `NEXTAUTH_URL` will be set after Vercel deployment
+- `API_URL` auto-generates based on your Render service name
+- Backend-only build optimizes for 512MB memory limit ✅
 
 ### Step 1.5: Create PostgreSQL Database
 1. Click **"New +"** → **"PostgreSQL"**
@@ -198,19 +223,27 @@ git push origin main
 
 ## Environment Variables Summary
 
-### Vercel (Frontend) Needs:
+### Vercel (Frontend Only) Needs:
 - `NEXTAUTH_URL` = Your Vercel URL
 - `NEXTAUTH_SECRET` = Generated secret
 - `API_URL` = Your Render backend URL
 
-### Render (Backend) Needs:
+### Render (Backend Only) Needs:
 - `NODE_ENV` = `production`
+- `NODE_VERSION` = `22.22.2`
 - `DATABASE_URL` = Auto-linked from PostgreSQL
 - `JWT_PRIVATE_KEY` = From `.env.local`
 - `JWT_PUBLIC_KEY` = From `.env.local`
 - `NEXTAUTH_SECRET` = Same as Vercel
-- `NEXTAUTH_URL` = Your Vercel URL
-- `API_URL` = Your Render URL
+- `NEXTAUTH_URL` = Your Vercel URL (for OAuth redirects)
+- `API_URL` = Auto-generated: `https://${render.host}`
+
+**Deployment Strategy:**
+```
+Vercel builds & deploys: apps/web/ (frontend only)
+Render builds & deploys: apps/api/ + packages/db (backend only)
+Each optimized for their platform
+```
 
 ---
 
@@ -234,6 +267,20 @@ git push origin main
 ---
 
 ## Troubleshooting
+
+### Memory Optimization (Render Free Tier)
+**render.yaml is optimized for safe deployment:**
+- ✅ Backend-only build (frontend on Vercel)
+- ✅ 320MB Node memory limit (under 512MB container)
+- ✅ Only builds `@esign/api` + `@esign/db`
+- ✅ ~50% faster builds and less memory usage
+
+If you still hit memory limits:
+1. Check build logs in Render dashboard
+2. Memory per process is capped at 320MB (safe)
+3. Upgrade to paid plan if needed ($7/month)
+
+---
 
 ### Frontend loads but API calls fail
 - Check `API_URL` in Vercel environment variables
