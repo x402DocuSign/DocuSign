@@ -28,5 +28,4 @@ services:
   - type: pserv
     name: esign-postgres
     plan: free
-    postgresVersion: 16
     ipAllowList: []
