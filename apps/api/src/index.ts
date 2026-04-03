@@ -13,14 +13,32 @@ console.log(`[dotenv] DATABASE_URL set: ${!!process.env.DATABASE_URL}`)
 console.log(`[dotenv] Environment: ${process.env.NODE_ENV || 'development'}`)
 console.log(`[dotenv] Parsed keys: ${Object.keys(envResult.parsed || {}).join(', ')}`)
 
-// Check if DATABASE_URL is available (from .env.local or Render environment)
-if (!process.env.DATABASE_URL) {
-  console.error('❌ CRITICAL: DATABASE_URL not found!')
-  if (envResult.error) {
-    console.error(`   .env.local not found (expected on Render/production): ${envResult.error.message}`)
+// Wait for DATABASE_URL to be available (with retries for Render deployment)
+async function waitForDatabase() {
+  const maxRetries = 30 // 30 seconds total (1 second per retry)
+  let retries = 0
+
+  while (!process.env.DATABASE_URL && retries < maxRetries) {
+    if (retries === 0) {
+      console.log('[startup] Waiting for DATABASE_URL to be set by Render...')
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    retries++
+    
+    // Reload dotenv in case it's been set now
+    dotenv.config({ path: envPath })
   }
-  console.error('   Set DATABASE_URL environment variable and try again.')
-  process.exit(1)
+
+  if (!process.env.DATABASE_URL) {
+    console.error('❌ CRITICAL: DATABASE_URL not found after 30 second timeout!')
+    if (envResult.error) {
+      console.error(`   .env.local not found: ${envResult.error.message}`)
+    }
+    console.error('   Manually set DATABASE_URL or link database in Render dashboard.')
+    process.exit(1)
+  }
+
+  console.log('[startup] ✅ DATABASE_URL is now available')
 }
 
 import express, { Application, Request, Response, NextFunction } from 'express'
@@ -175,5 +193,13 @@ async function startServer() {
   }
 }
 
-// Start the server
-startServer()
+// Initialize: Wait for DATABASE_URL, then start server
+(async () => {
+  try {
+    await waitForDatabase()
+    await startServer()
+  } catch (error) {
+    console.error('Fatal startup error:', error)
+    process.exit(1)
+  }
+})()
