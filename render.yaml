@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: esign-platform
+    name: esign-api
     runtime: node
     plan: free
-    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @esign/db prisma generate && NODE_OPTIONS="--max-old-space-size=256" pnpm --filter @esign/web build && NODE_OPTIONS="--max-old-space-size=256" pnpm --filter @esign/api build
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @esign/db prisma generate && NODE_OPTIONS="--max-old-space-size=320" pnpm --filter @esign/api build
     startCommand: pnpm run start
     envVars:
       - key: NODE_ENV
@@ -21,7 +21,7 @@ services:
       - key: NEXTAUTH_SECRET
         sync: false
       - key: NEXTAUTH_URL
-        value: https://${render.host}
+        sync: false
       - key: API_URL
         value: https://${render.host}
 
