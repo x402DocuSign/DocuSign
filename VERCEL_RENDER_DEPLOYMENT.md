@@ -7,13 +7,11 @@ Complete guide to deploy frontend (Vercel) + backend (Render) for eSign Platform
 **Before deploying, verify locally:**
 
 ```bash
-# 1. Test build succeeds locally
-pnpm install --frozen-lockfile
-pnpm --filter @esign/db prisma generate
-pnpm --filter @esign/api build
+# 1. Test production build succeeds locally (simulates Render environment)
+NODE_ENV=production npm run build
 
 # 2. Test start command works
-pnpm run start
+npm start
 
 # 3. Verify render.yaml is in root
 ls -la render.yaml
@@ -23,11 +21,17 @@ git status
 git log --oneline -5
 ```
 
+**NOTE: New Fallback Build System** ✨
+- Added intelligent build script (/scripts/build.js) that detects your environment
+- **Production mode** (NODE_ENV=production): Builds only backend - NO TURBO NEEDED
+- **Development mode**: Builds everything using turbo
+- **Result**: Works perfectly on Render even if render.yaml isn't detected!
+
 **Fix these common issues BEFORE deploying:**
 
+- ✅ Production build works locally: `NODE_ENV=production npm run build`
 - ✅ All code pushed to GitHub (git status should be clean)
 - ✅ render.yaml exists in project root (not in any subdirectory)
-- ✅ render.yaml has no YAML syntax errors (check via https://www.yamllint.com/)
 - ✅ pnpm-lock.yaml is committed to git
 - ✅ All environment variables will be added to Render (not in render.yaml)
 - ✅ PostgreSQL service name is `esign-postgres` in render.yaml
@@ -351,54 +355,20 @@ Each optimized for their platform
 
 ## Troubleshooting
 
-### ❌ "turbo: not found" Error (render.yaml NOT DETECTED)
-**Root Cause**: Render is NOT using render.yaml - it ran root `package.json` build instead
+### ❌ "turbo: not found" Error (FIXED WITH NEW BUILD SCRIPT)
+**Old Issue**: Render running root `package.json` build with turbo (not in devDependencies)
 
-**Evidence in logs:**
-```
-> esign-platform@1.0.0 build
-> turbo build
-sh: 1: turbo: not found
-```
-← turbo is only in devDependencies (NODE_ENV=production skips it)
+**✅ FIXED**: New intelligent build script in `/scripts/build.js`
+- Detects NODE_ENV automatically
+- Production mode: Builds backend only WITHOUT turbo
+- Works even if render.yaml isn't detected perfectly
 
-**Solution - DELETE & RECREATE Service:**
-1. Go to Render dashboard → esign-api service
-2. Click **Settings** → Scroll to **"Danger Zone"** → **"Delete Service"**
-3. Confirm deletion (wait for it to complete)
-4. Click **"New +"** → **"Web Service"**
-5. Select repository: **x402DocuSign/DocuSign**
-6. **CRITICAL STEP** - You'll see:
-   ```
-   "It looks like we don't have access to your repo, but we'll try to clone it anyway."
-   ```
-   Click **"Connect anyway"** ← This enables Blueprint mode
-7. **VERIFY** - You should see:
-   ```
-   "Render will look for a render.yaml file to configure this service"
-   ```
-   If you DON'T see this → STOP, Render support issue
-8. **VERIFY** - You should see:
-   ```
-   "This repository has a render.yaml file" ✅
-   ```
-9. Configuration:
-   - Name: `esign-api`
-   - Region: `Oregon` (or closest)
-   - Branch: `main`
-10. **DO NOT EDIT** Build/Start/Root fields (should be empty for Blueprint mode)
-11. Click **"Create Web Service"** and watch logs
-
-**Correct build logs will show:**
-```
-==> Running build command 'pnpm install --frozen-lockfile && pnpm --filter @esign/db prisma generate && NODE_OPTIONS="--max-old-space-size=320" pnpm --filter @esign/api build'
-```
-
-**If STILL getting turbo error:**
-1. Validate YAML: Paste render.yaml content into https://www.yamllint.com/ (check for errors)
-2. Verify file location: `ls -la render.yaml` (must show file exists at root)
-3. Force update: `git push origin main` (Render may have stale cache)
-4. Wait 30 seconds then check again in Render dashboard
+**If you STILL see this error:**
+1. Git pull latest changes: `git pull origin main`
+2. Test locally: `NODE_ENV=production npm run build`
+3. Push to GitHub: `git push origin main`
+4. Delete Render service and recreate
+5. Check Render logs - should show: `pnpm run build` (not `turbo build`)
 
 ---
 
