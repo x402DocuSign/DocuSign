@@ -21,6 +21,11 @@ export interface AuthenticatedRequest extends Request {
 }
 
 function getPublicKey(): string {
+  // First check for env variable (Render/production)
+  if (process.env.JWT_PUBLIC_KEY) {
+    return process.env.JWT_PUBLIC_KEY
+  }
+  // Fall back to file path (local development)
   const keyPath = process.env.JWT_PUBLIC_KEY_PATH || './keys/public.pem'
   return fs.readFileSync(path.resolve(keyPath), 'utf8')
 }

@@ -5,11 +5,21 @@ import { v4 as uuidv4 } from 'uuid'
 import { prisma, User } from '@esign/db'
 
 function getPrivateKey(): string {
+  // First check for env variable (Render/production)
+  if (process.env.JWT_PRIVATE_KEY) {
+    return process.env.JWT_PRIVATE_KEY
+  }
+  // Fall back to file path (local development)
   const keyPath = process.env.JWT_PRIVATE_KEY_PATH || './keys/private.pem'
   return fs.readFileSync(path.resolve(keyPath), 'utf8')
 }
 
 function getPublicKey(): string {
+  // First check for env variable (Render/production)
+  if (process.env.JWT_PUBLIC_KEY) {
+    return process.env.JWT_PUBLIC_KEY
+  }
+  // Fall back to file path (local development)
   const keyPath = process.env.JWT_PUBLIC_KEY_PATH || './keys/public.pem'
   return fs.readFileSync(path.resolve(keyPath), 'utf8')
 }
