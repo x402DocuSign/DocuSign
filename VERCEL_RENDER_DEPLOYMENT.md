@@ -2,6 +2,38 @@
 
 Complete guide to deploy frontend (Vercel) + backend (Render) for eSign Platform.
 
+## ⚠️ PRE-DEPLOYMENT CHECKLIST (READ FIRST!)
+
+**Before deploying, verify locally:**
+
+```bash
+# 1. Test build succeeds locally
+pnpm install --frozen-lockfile
+pnpm --filter @esign/db prisma generate
+pnpm --filter @esign/api build
+
+# 2. Test start command works
+pnpm run start
+
+# 3. Verify render.yaml is in root
+ls -la render.yaml
+
+# 4. Verify all changes are committed
+git status
+git log --oneline -5
+```
+
+**Fix these common issues BEFORE deploying:**
+
+- ✅ All code pushed to GitHub (git status should be clean)
+- ✅ render.yaml exists in project root (not in any subdirectory)
+- ✅ render.yaml has no YAML syntax errors (check via https://www.yamllint.com/)
+- ✅ pnpm-lock.yaml is committed to git
+- ✅ All environment variables will be added to Render (not in render.yaml)
+- ✅ PostgreSQL service name is `esign-postgres` in render.yaml
+
+---
+
 ## Architecture
 ```
 Frontend (Vercel)           Backend (Render)          Database (Render)
@@ -39,60 +71,107 @@ https://your-app.vercel.app → https://your-api.onrender.com → PostgreSQL 16
    - **Environment**: `Node`
    - **Region**: `Oregon` (US) or closest to you
    - **Branch**: `main`
+4. **CRITICAL**: Make sure **"Connect via Render Blueprint (render.yaml)"** is selected
+   - If you don't see this option, click **"Edit"** and select it
+   - Render must use the render.yaml configuration
 
 ### Step 1.3: Build & Start Commands
-Render **automatically detects** from `render.yaml` - **no manual setup needed!**
+**VERIFY Render Blueprint is being used:**
 
-The optimized configuration:
-- ✅ Only builds backend (`@esign/api` + `@esign/db`)
-- ✅ Frontend automatically deploys to Vercel separately
-- ✅ Memory optimized: 320MB (safe under 512MB limit)
-- ✅ Saves ~50% deployment time and memory usage
+✅ **DO NOT manually enter build commands** - Let Render auto-detect from `render.yaml`
+- Build Command field should be **EMPTY** (auto-detected from render.yaml)
+- Start Command field should be **EMPTY** (auto-detected from render.yaml)
+- Root Directory should be **EMPTY** (monorepo handled automatically)
 
-Leave blank:
-- ✅ Build Command (auto-detected)
-- ✅ Start Command (auto-detected)
-- ✅ Root Directory (monorepo handled by render.yaml)
+**If you see an error dialog:**
+- ❌ "Render Blueprint couldn't be parsed" → Check YAML syntax at https://www.yamllint.com/
+- ❌ "File not found" → Verify render.yaml is in repo root, not in a subdirectory
+
+**The render.yaml configuration:**
+- Only builds backend (`@esign/api` + `@esign/db`) - frontend goes to Vercel
+- Memory optimized: 320MB Node (safe under 512MB limit)
+- Auto-links DATABASE_URL from PostgreSQL service
+- Saves ~50% deployment time and memory vs building everything
 
 ### Step 1.4: Add Environment Variables
 
-Scroll to "Environment" section and add:
+**IMPORTANT**: These values should be in `render.yaml` already, but verify they exist on Render dashboard:
 
-| Key | Value |
-|-----|-------|
-| `NODE_ENV` | `production` |
-| `NODE_VERSION` | `22.22.2` |
-| `JWT_PRIVATE_KEY` | [Copy from your `.env.local`] |
-| `JWT_PUBLIC_KEY` | [Copy from your `.env.local`] |
-| `NEXTAUTH_SECRET` | Generate: `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | [Your Vercel frontend URL - set later] |
-| `API_URL` | `https://${render.host}` (auto-replaced with backend URL) |
+1. Go to **Settings** → **Environment Variables**
+2. **Render auto-adds** (you see these, don't edit):
+   - `NODE_ENV` = `production`
+   - `NODE_VERSION` = `22.22.2`
+   - `DATABASE_URL` = Auto-linked from PostgreSQL
+   - `API_URL` = Auto-generated from service name
 
-**Important Notes:**
-- `NEXTAUTH_URL` will be set after Vercel deployment
-- `API_URL` auto-generates based on your Render service name
-- Backend-only build optimizes for 512MB memory limit ✅
+3. **You MUST add manually** (click **"Add Secret"** for each):
+   - `JWT_PRIVATE_KEY` = [Copy from your `.env.local`] ✅ REQUIRED
+   - `JWT_PUBLIC_KEY` = [Copy from your `.env.local`] ✅ REQUIRED
+   - `NEXTAUTH_SECRET` = Generate with `openssl rand -base64 32` ✅ REQUIRED
+   - `NEXTAUTH_URL` = [Set AFTER Vercel deploys]
+
+**To get JWT keys from .env.local:**
+```bash
+# In your local project
+cat .env.local | grep JWT
+echo "---"
+echo "Copy JWT_PRIVATE_KEY value (entire long key)"
+echo "Copy JWT_PUBLIC_KEY value (entire long key)"
+```
+
+**Mark as secrets:**
+- ✅ CHECK "Is this a secret?" for JWT_* and NEXTAUTH_SECRET
+- ✅ This prevents values from showing in logs
+
+**⚠️ DO NOT copy DATABASE_URL** - Render auto-links it from PostgreSQL service
 
 ### Step 1.5: Create PostgreSQL Database
 1. Click **"New +"** → **"PostgreSQL"**
 2. Fill in:
-   - **Name**: `esign-db`
+   - **Name**: `esign-postgres` ⚠️ **EXACT NAME REQUIRED** (render.yaml references this)
    - **Database**: `esign_db`
    - **User**: `esign_user`
-   - **Region**: Same as web service
+   - **Region**: **Same as esign-api web service** (CRITICAL!)
    - **Plan**: `Free`
 
-3. Wait for database to be created
-4. Copy the **Internal Database URL**
-5. Go back to web service → Update environment variable:
-   - **Key**: `DATABASE_URL`
-   - **Value**: [Paste the Internal Database URL]
+3. Click **"Create Database"** and wait (3-5 minutes)
+
+4. **Render auto-links DATABASE_URL:**
+   - ⚠️ DO NOT manually copy/paste DATABASE_URL
+   - render.yaml has `fromDatabase: esign-postgres` - it auto-links
+   - Just verify it appears in environment variables after creation
+
+5. **Verify database is ready:**
+   - Go to esign-postgres service
+   - Click "Connect" tab
+   - See database credentials
 
 ### Step 1.6: Deploy Web Service
 1. Scroll to top and click **"Create Web Service"**
-2. Wait for build to complete (5-10 minutes)
-3. Once deployed, you'll get a URL like: `https://esign-api.onrender.com`
-4. **Save this URL** - you'll need it for frontend
+2. Render starts the build (watch logs in **"Logs"** tab)
+3. **Wait for build to complete** (5-10 minutes for first build)
+
+**If build fails, check:**
+- ✅ render.yaml is in repo root (not in subdirectory)
+- ✅ render.yaml has valid YAML syntax (https://www.yamllint.com/)
+- ✅ `pnpm-lock.yaml` is committed to git
+- ✅ All code is pushed to GitHub (git push origin main)
+- ✅ PostgreSQL service exists and is in same region
+- ✅ Check **"Logs"** tab for exact error message
+
+**Build logs you should see:**
+```
+==> Cloning from https://github.com/x402DocuSign/DocuSign
+==> Checking out commit...
+==> Running build command 'pnpm install --frozen-lockfile && ...'
+pnpm install: Done
+pnpm --filter @esign/db prisma generate: Done
+Building @esign/api...
+==> Build succeeded! 🎉
+```
+
+4. Once deployed, you'll get a URL like: `https://esign-api.onrender.com`
+5. **Save this URL** - you'll need it for frontend
 
 ---
 
@@ -268,6 +347,53 @@ Each optimized for their platform
 
 ## Troubleshooting
 
+### ❌ "turbo: not found" Error
+**Root Cause**: Render is not using render.yaml - it's using root package.json build script
+
+**Fix:**
+1. ✅ Verify render.yaml exists in repo root: `ls render.yaml`
+2. ✅ Verify YAML syntax: https://www.yamllint.com/ (paste render.yaml content)
+3. ✅ Verify `pnpm-lock.yaml` is committed: `git log pnpm-lock.yaml`
+4. ✅ Verify all code is pushed: `git status` (should be clean)
+5. ✅ Go to Render dashboard → esign-api service → **"Settings"**
+   - Look for **"Render Blueprint"** section
+   - Should show: **"Using render.yaml from GitHub"`** (not "No blueprint")
+6. If still broken: Delete service and create new one, ensure Blueprint option is selected
+
+---
+
+### ❌ "Database connection error" or "ECONNREFUSED"
+**Root Cause**: PostgreSQL service name doesn't match or region mismatch
+
+**Fix:**
+1. ✅ Verify PostgreSQL service name is **EXACTLY** `esign-postgres`
+   - Go to Render dashboard → PostgreSQL service
+   - Settings → Name should be `esign-postgres` (case-sensitive)
+2. ✅ Verify both services are in **SAME region**
+   - esign-api service: Settings → Region
+   - esign-postgres service: Settings → Region
+   - If different, delete and recreate in same region
+3. ✅ Verify DATABASE_URL in environment variables
+   - Get from: esign-api → Settings → Environment Variables
+   - Should contain: `postgresql://user:password@...`
+4. Run migrations: `pnpm --filter @esign/db migrate deploy`
+
+---
+
+### ❌ Build succeeds but no logs after "build succeeded"
+**Root Cause**: Start command is wrong or application is crashing
+
+**Check:**
+1. Go to esign-api → **"Logs"** tab → Switch to **"Latest"** view
+2. Look for error messages after "Listening on port"
+3. Common issues:
+   - ❌ `Error: Cannot find module` → Missing dependency (run `pnpm install` locally)
+   - ❌ `Error: getaddrinfo ENOTFOUND esign-postgres` → Region mismatch for PostgreSQL
+   - ❌ `Error: connect ECONNREFUSED` → Database not ready (wait 5 more minutes)
+4. If crashed, check: esign-api → Settings → Start Command (should be empty for render.yaml)
+
+---
+
 ### Memory Optimization (Render Free Tier)
 **render.yaml is optimized for safe deployment:**
 - ✅ Backend-only build (frontend on Vercel)
@@ -282,24 +408,49 @@ If you still hit memory limits:
 
 ---
 
+### ✅ Backend health check endpoint
+
+**Test that backend is actually running:**
+```bash
+curl https://esign-api.onrender.com/api/health
+# Should return: {"status":"ok"}
+```
+
+If 404 or connection refused:
+1. Backend may still be starting (wait 2-3 min)
+2. Check Render logs: esign-api → Logs → Latest
+3. Verify start command works locally: `pnpm run start`
+
+---
+
 ### Frontend loads but API calls fail
-- Check `API_URL` in Vercel environment variables
-- Verify backend is running: https://esign-api.onrender.com/api/health
-- Check CORS settings in backend (should be enabled)
+- ❌ Check `API_URL` in Vercel environment variables (should be `https://esign-api.onrender.com`)
+- ❌ Verify backend health: `curl https://esign-api.onrender.com/api/health`
+- ❌ Check browser console for actual error messages
+- ❌ Verify CORS is enabled in backend (should be by default in express.ts)
 
-### Backend deployment fails
-- Check build logs in Render dashboard
-- Verify `pnpm install --frozen-lockfile` works locally
-- Confirm PostgreSQL database is created
+---
 
-### Database connection error
-- Verify `DATABASE_URL` in Render environment
-- Check PostgreSQL service is running
-- Run migrations: `pnpm --filter @esign/db migrate deploy`
+### Backend fails to run after successful build
+- ✅ Check Render logs: esign-api → Logs → Switch to **"Latest"**
+- ✅ Look for errors like: `Cannot find module`, `ECONNREFUSED`, `TypeError`
+- ✅ Verify start command is empty (auto-detected from render.yaml as `pnpm run start`)
+- ✅ Verify Node.js version: Should see `Using Node.js version 22.22.2`
 
-### "Migrations have not been run yet"
-- SSH into Render backend: `render ssh -e production`
-- Run: `pnpm --filter @esign/db migrate deploy`
+---
+
+### "Migrations have not been run yet" error when accessing app
+- ✅ SSH into Render backend:
+  ```bash
+  render ssh -e production
+  cd /app
+  pnpm --filter @esign/db migrate deploy
+  exit
+  ```
+- ✅ Or use Render Shell (easier):
+  1. esign-api → Shell tab
+  2. Run: `pnpm --filter @esign/db migrate deploy`
+  3. Should complete in <1 minute
 
 ---
 
