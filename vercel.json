@@ -5,16 +5,7 @@
   "framework": "nextjs",
   "regions": ["sfo1"],
   "env": {
-    "NODE_ENV": "production",
-    "NEXTAUTH_URL": {
-      "description": "Your Vercel deployment URL (e.g., https://your-project.vercel.app)"
-    },
-    "NEXTAUTH_SECRET": {
-      "description": "Generate with: openssl rand -base64 32"
-    },
-    "API_URL": {
-      "description": "Your Render backend URL (e.g., https://your-api.onrender.com)"
-    }
+    "NODE_ENV": "production"
   },
   "git": {
     "deploymentEnabled": {
