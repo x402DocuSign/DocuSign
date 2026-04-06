@@ -5,10 +5,10 @@ echo "🔨 Render Build Script"
 echo "   NODE_ENV: $NODE_ENV"
 echo ""
 
-# Install dependencies first with development environment
-echo "📦 Installing dependencies..."
-export NODE_ENV=development
-pnpm install --frozen-lockfile
+# Install dependencies including dev dependencies (needed for TypeScript compilation)
+echo "📦 Installing dependencies (including devDependencies)..."
+unset NODE_ENV
+pnpm install
 
 # Now build with production environment
 echo ""
