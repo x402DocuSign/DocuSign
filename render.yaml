@@ -27,6 +27,22 @@ services:
       - key: API_URL
         value: https://${render.host}
 
+  - type: web
+    name: esign-web
+    runtime: node
+    plan: free
+    buildCommand: pnpm install && pnpm run db:generate && pnpm --filter @esign/web build
+    startCommand: pnpm --filter @esign/web start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://esign-api.onrender.com
+      - key: NEXTAUTH_URL
+        value: https://${render.host}
+      - key: NEXTAUTH_SECRET
+        sync: false
+
   - type: pserv
     name: esign-postgres
     plan: free
