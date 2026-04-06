@@ -31,7 +31,7 @@ services:
     name: esign-web
     runtime: node
     plan: free
-    buildCommand: pnpm install && pnpm run db:generate && pnpm --filter @esign/web build
+    buildCommand: pnpm install && pnpm run db:generate && pnpm build --filter @esign/web...
     startCommand: pnpm --filter @esign/web start
     envVars:
       - key: NODE_ENV
