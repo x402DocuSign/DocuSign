@@ -1,5 +1,5 @@
 {
   "installCommand": "corepack enable && pnpm install --frozen-lockfile",
-  "buildCommand": "bash scripts/vercel-build.sh",
+  "buildCommand": "if [ -f scripts/vercel-build.sh ]; then bash scripts/vercel-build.sh; else bash ../../scripts/vercel-build.sh; fi",
   "framework": "nextjs"
 }
