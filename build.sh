@@ -18,7 +18,7 @@ max_attempts=5
 attempt=1
 while [ $attempt -le $max_attempts ]; do
   echo "Attempt $attempt/$max_attempts"
-  if pnpm install --shamefully-hoist --frozen-lockfile=false; then
+  if pnpm install --frozen-lockfile=false; then
     echo "pnpm install succeeded"
     break
   else

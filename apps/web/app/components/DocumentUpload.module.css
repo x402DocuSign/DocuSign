@@ -2,7 +2,7 @@
    DocumentUpload Component Styles (Ink Covenant Theme)
    ═══════════════════════════════════════════════════════════ */
 
-:root {
+.container {
   --ink-black:       #080808;
   --ink-deep:        #0A0A0A;
   --ink-card:        #121212;

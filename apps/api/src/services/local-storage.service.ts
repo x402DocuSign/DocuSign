@@ -121,7 +121,7 @@ export async function getSignedUrlForLocalStorage(
   const expiresAt = Date.now() + expiresIn * 1000
   const token = signDownloadToken(s3Key, expiresAt)
   const downloadUrl = `${apiUrl}/api/documents/download?key=${encodeURIComponent(s3Key)}&expires=${expiresAt}&token=${token}`
-  console.log(`[Local Storage] Generated presigned URL:`, downloadUrl)
+  console.log('[Local Storage] Generated presigned URL')
   return downloadUrl
 }
 

@@ -44,7 +44,7 @@ async function waitForDatabase() {
 }
 
 import express, { Application, Request, Response, NextFunction } from 'express'
-import cors from 'cors'
+import cors, { CorsOptions } from 'cors'
 import helmet from 'helmet'
 import compression from 'compression'
 import { rateLimit } from 'express-rate-limit'
@@ -54,6 +54,47 @@ import { logger } from '@esign/utils/logger'
 
 const app = express() as any
 const PORT = process.env.PORT || 4000
+
+const defaultAllowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://docu-sign-web.vercel.app',
+]
+
+const allowedOrigins = Array.from(new Set([
+  ...defaultAllowedOrigins,
+  ...(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(origin => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean),
+]))
+
+const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEW_ORIGINS === 'true'
+
+const corsOptions: CorsOptions = {
+  origin(origin, callback) {
+    if (!origin) {
+      callback(null, true)
+      return
+    }
+
+    const normalizedOrigin = origin.replace(/\/$/, '')
+    const isAllowedOrigin = allowedOrigins.includes(normalizedOrigin)
+    const isVercelPreview =
+      allowVercelPreviews && /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(normalizedOrigin)
+
+    if (isAllowedOrigin || isVercelPreview) {
+      callback(null, true)
+      return
+    }
+
+    callback(new Error(`CORS origin not allowed: ${origin}`))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Idempotency-Key', 'X-API-Key', 'X-Payment', 'X-Skip-Payment'],
+  optionsSuccessStatus: 204,
+}
 
 // Routes will be loaded dynamically inside the async startup function
 let authRoutes: any
@@ -82,12 +123,8 @@ app.use(helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }))
 
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Idempotency-Key', 'X-API-Key', 'X-Payment', 'X-Skip-Payment'],
-}))
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 
 app.use(compression())
 

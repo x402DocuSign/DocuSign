@@ -2,7 +2,7 @@
    Ink Covenant – Dashboard Design (from esign-dashboard.html)
    ============================================================ */
 
-:root {
+.page {
   --ink-black: #080808;
   --ink-deep: #0a0a0a;
   --ink-card: #111111;
@@ -511,4 +511,63 @@
   .titleSection { flex-direction: column; align-items: flex-start; gap: 16px; }
   .mainTitle { font-size: 36px; }
   .contentContainer { padding: 24px 20px; }
+}
+
+/* Liquid glass theme alignment */
+.page {
+  --font: var(--font-body);
+  --ink-deep: #000000;
+  --ink-card: rgba(255, 255, 255, 0.035);
+  --ink-card2: rgba(255, 255, 255, 0.055);
+  --ink-border: rgba(255, 255, 255, 0.12);
+  --ink-border2: rgba(255, 255, 255, 0.2);
+  --warm-white: #060606;
+  --warm-off: rgba(255, 255, 255, 0.05);
+  --warm-grid: rgba(255, 255, 255, 0.055);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --text-light: #ffffff;
+  --accent: #ffffff;
+  --accent-dark: rgba(255, 255, 255, 0.7);
+  background: #000;
+}
+
+.sidebar {
+  border-right-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(6px);
+}
+
+.logoIcon,
+.uploadBtn,
+.signOutBtn {
+  background: #fff;
+  color: #000;
+}
+
+.logoText,
+.mainTitle,
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.userCard,
+.statCard,
+.quickAction,
+.documentSection,
+.uploadModal {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08), 0 24px 70px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(6px);
+}
+
+.mainContent {
+  background:
+    radial-gradient(ellipse at top, rgba(255, 255, 255, 0.04), transparent 55%),
+    #000;
 }

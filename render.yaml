@@ -43,7 +43,7 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: https://docu-sign-web.vercel.app
       - key: AES_ENCRYPTION_KEY
         sync: false
       - key: STORAGE_PROVIDER

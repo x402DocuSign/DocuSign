@@ -203,6 +203,13 @@ router.get(
 router.get(
   '/download',
   async (req: Request, res: Response) => {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      process.env.FORCE_LOCAL_STORAGE !== 'true'
+    ) {
+      return res.status(404).json({ error: 'Not found' })
+    }
+
     const key = req.query.key as string
     const expires = Number(req.query.expires)
     const token = req.query.token as string
@@ -224,7 +231,9 @@ router.get(
 
       res.send(fileBuffer)
     } catch (error) {
-      console.error('[Documents] Download error:', error)
+      logger.error('[Documents] Download error', {
+        error: error instanceof Error ? error.message : String(error),
+      })
       res.status(500).json({ error: 'Failed to download file' })
     }
   }
@@ -288,10 +297,8 @@ router.get(
     const s3Key = document.s3SignedKey || document.s3Key
     const url = await getPresignedDownloadUrl(s3Key, 900)
 
-    console.log('[Documents] Download URL endpoint:', {
+    logger.info('[Documents] Download URL generated', {
       documentId: document.id,
-      s3Key,
-      url,
       isSigned: !!document.s3SignedKey,
     })
 

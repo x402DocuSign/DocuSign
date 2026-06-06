@@ -5,10 +5,17 @@
   "packageManager": "pnpm@9.0.0",
   "scripts": {
     "dev": "turbo dev",
+    "dev:web": "pnpm --filter @esign/web dev",
+    "dev:web:turbo": "pnpm --filter @esign/web dev:turbo",
+    "dev:api": "pnpm --filter @esign/api dev",
     "build": "node scripts/build.js",
     "start": "pnpm run db:migrate:deploy && pnpm --filter @esign/api start",
     "start:web": "pnpm --filter @esign/web start",
     "lint": "turbo lint",
+    "clean": "pnpm run clean:logs && pnpm run clean:next && pnpm run clean:turbo",
+    "clean:logs": "node scripts/clean.js logs",
+    "clean:next": "node scripts/clean.js next",
+    "clean:turbo": "node scripts/clean.js turbo",
     "db:migrate": "pnpm --filter @esign/db migrate",
     "db:migrate:deploy": "pnpm --filter @esign/db migrate:deploy",
     "db:generate": "pnpm --filter @esign/db generate",
@@ -45,8 +52,19 @@
   },
   "pnpm": {
     "overrides": {
+      "axios": "1.16.0",
+      "@hono/node-server": "1.19.13",
+      "fast-uri": "3.1.2",
+      "fast-xml-builder": "1.2.0",
+      "fast-xml-parser": "5.7.0",
+      "follow-redirects": "1.16.0",
       "glob": ">=10.5.0",
-      "next": ">=15.0.8"
+      "hono": "4.12.23",
+      "next": "16.2.6",
+      "postcss": "8.5.10",
+      "qs": "6.15.2",
+      "uuid": "11.1.1",
+      "ws": "8.20.1"
     }
   }
 }

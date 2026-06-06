@@ -4,69 +4,29 @@ const features = [
   {
     icon: 'pdf',
     title: 'Upload and sign PDFs instantly',
-    copy: 'Drop in a contract, place your signature, and send it out in a flow that feels familiar from the first click.',
+    copy: 'Drop in a contract, place your signature, and send it out in a familiar flow.',
   },
   {
     icon: 'wallet',
-    title: 'x402 payments built into signing',
-    copy: 'Each paid signature can be requested, verified, and recorded through an HTTP-native x402 payment flow.',
+    title: 'Base and Stellar payments',
+    copy: 'Let users pay before signing through wallet-native payment flows on both supported testnets.',
   },
   {
     icon: 'team',
     title: 'Team collaboration',
-    copy: 'Share documents, assign signers, and keep everyone aligned with clear document access states.',
-  },
-  {
-    icon: 'vault',
-    title: 'Secure document storage',
-    copy: 'Keep signed agreements organized with encrypted storage, activity history, and simple retrieval.',
+    copy: 'Share documents, assign signers, and keep workspace access clear for every member.',
   },
   {
     icon: 'chain',
-    title: 'Smart contract verification',
-    copy: 'Every signed document gets a tamper-evident verification trail that can be checked on-chain.',
-  },
-  {
-    icon: 'wallet',
-    title: 'MetaMask on Base',
-    copy: 'Connect a wallet, review the exact signing fee, and approve payment without a separate checkout page.',
+    title: 'Tamper-evident verification',
+    copy: 'Preserve document hashes and payment proof without publishing the private PDF on-chain.',
   },
 ]
 
 const trustCards = [
-  {
-    title: 'Payment proof per signature',
-    copy: 'Paid signing actions are tied to a recorded x402 payment attempt, so the business logic stays auditable from day one.',
-  },
-  {
-    title: 'Document hash verification',
-    copy: 'SignHere can verify document integrity without putting the private PDF itself on-chain.',
-  },
-  {
-    title: 'Clear wallet consent',
-    copy: 'Users see the action, network, and amount before approving a wallet transaction.',
-  },
-  {
-    title: 'Team access controls',
-    copy: 'Team subscriptions can support invite codes so owners decide who joins the workspace.',
-  },
-]
-
-const plans = [
-  {
-    name: 'Individual',
-    price: '0.000091 ETH',
-    cadence: 'per signed PDF',
-    copy: 'Best for solo users who want to pay only when they complete a signature.',
-    bullets: ['No monthly commitment', 'x402 payment per signature', 'Document hash verification'],
-  },
-  {
-    name: 'Team',
-    price: 'Subscription',
-    cadence: 'for shared workspaces',
-    copy: 'Best for teams that want one owner to manage access and signing coverage.',
-    bullets: ['Owner-paid workspace', 'Shareable registration codes', 'Members sign under team access'],
-  },
+  ['Payment proof', 'Each paid signing action can be tied to a recorded wallet payment attempt.'],
+  ['Document integrity', 'Signed files can be verified by hash while the document itself stays private.'],
+  ['Clear consent', 'Users review the document, network, and amount before approving payment.'],
 ]
 
 function Icon({ name }: { name: string }) {
@@ -99,18 +59,6 @@ function Icon({ name }: { name: string }) {
     )
   }
 
-  if (name === 'vault') {
-    return (
-      <svg {...common}>
-        <rect x="5" y="7" width="20" height="17" rx="4" fill="currentColor" opacity=".16" />
-        <rect x="5" y="7" width="20" height="17" rx="4" stroke="currentColor" strokeWidth="2" />
-        <path d="M10 7V5.5A4.5 4.5 0 0 1 14.5 1h1A4.5 4.5 0 0 1 20 5.5V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M15 14v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="15" cy="13" r="2" fill="currentColor" />
-      </svg>
-    )
-  }
-
   if (name === 'chain') {
     return (
       <svg {...common}>
@@ -134,11 +82,10 @@ export default function LandingPage() {
   return (
     <main className={styles.landing} id="top">
       <nav className={styles.navbar} aria-label="Primary navigation">
-        <div className="container">
-          <div className={styles.navShell}>
-            <a className={styles.navCta} href="/sign">Sign Now</a>
+        <div className={styles.container}>
+          <div className={`${styles.navShell} liquid-glass`}>
             <a className={styles.brand} href="#top" aria-label="SignHere home">
-              <img src="/main_logo.png" alt="" width="42" height="42" />
+              <img src="/main_logo.png" alt="" width="44" height="44" />
               <span>SignHere</span>
             </a>
             <div className={styles.navLinks}>
@@ -147,281 +94,153 @@ export default function LandingPage() {
               <a href="#docs">Docs</a>
               <a href="/auth/login">Login</a>
             </div>
+            <a className={styles.navCta} href="/sign">Sign Now</a>
           </div>
         </div>
       </nav>
 
       <section className={styles.hero}>
-        <div className={styles.meshOne} aria-hidden="true" />
-        <div className={styles.meshTwo} aria-hidden="true" />
-        <div className="container">
-          <div className="row align-items-center gy-5">
-            <div className="col-12 col-lg-6">
-              <p className={styles.eyebrow}>The easiest way to sign documents on-chain</p>
-              <h1>Sign Documents Smarter, Not Harder</h1>
+        <div className={styles.container}>
+          <div className={styles.heroGrid}>
+            <div className={styles.heroCopyBlock}>
+              <p className={styles.eyebrow}>Blockchain e-signatures for real documents</p>
+              <h1>Sign documents smarter, not harder.</h1>
               <p className={styles.heroCopy}>
-                Secure, fast, and blockchain-powered e-signatures for individuals and teams.
+                Secure, fast, wallet-powered signatures for individuals and teams, now supporting Base and Stellar testnet payments.
               </p>
               <div className={styles.heroActions}>
                 <a className={styles.primaryButton} href="/sign">Start Signing</a>
                 <a className={styles.secondaryButton} href="/auth/login">Connect Wallet</a>
               </div>
               <div className={styles.heroNotes} aria-label="Product highlights">
-                <span>Takes less than 30 seconds</span>
-                <span>Create account for security</span>
+                <span>Base payments</span>
+                <span>Stellar testnet</span>
+                <span>Document hash proof</span>
               </div>
             </div>
-            <div className="col-12 col-lg-6">
-              <div className={styles.heroVisual}>
-                <div className={styles.documentFloat}>
-                  <div className={styles.docTop}>
-                    <span>Service Agreement.pdf</span>
-                    <b>Ready</b>
-                  </div>
-                  <div className={styles.docLines}>
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                  <div className={styles.signatureBox}>
-                    <span>Place signature</span>
-                    <svg viewBox="0 0 260 64" aria-hidden="true">
-                      <path d="M9 42c23-30 38-30 45-3 5 19 24 12 39-10 17-25 33-23 28 3-5 25 32 16 128-17" />
-                    </svg>
-                  </div>
+
+            <div className={styles.heroVisual}>
+              <div className={`${styles.documentFloat} liquid-glass`}>
+                <div className={styles.docTop}>
+                  <span>Service Agreement.pdf</span>
+                  <b>Ready</b>
                 </div>
-                <img className={styles.mascot} src="/main_logo.png" alt="Cute SignHere octopus mascot holding a pen" />
-                <div className={styles.verifyBadge}>
-                  <span className={styles.pulseDot} />
-                  Verified on Base
+                <div className={styles.docLines}>
+                  <span />
+                  <span />
+                  <span />
                 </div>
-                <div className={styles.walletPill}>0x8f...42A connected</div>
+                <div className={styles.signatureBox}>
+                  <span>Place signature</span>
+                  <svg viewBox="0 0 260 64" aria-hidden="true">
+                    <path d="M9 42c23-30 38-30 45-3 5 19 24 12 39-10 17-25 33-23 28 3-5 25 32 16 128-17" />
+                  </svg>
+                </div>
               </div>
+              <img className={styles.mascot} src="/main_logo.png" alt="SignHere mascot holding a pen" />
+              <div className={`${styles.verifyBadge} liquid-glass`}>
+                <span className={styles.pulseDot} />
+                Verified on Base
+              </div>
+              <div className={`${styles.walletPill} liquid-glass`}>Freighter ready</div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className={styles.previewSection}>
-        <div className="container">
-          <div className="row align-items-center gy-4">
-            <div className="col-12 col-lg-5">
+      <section className={styles.previewSection} id="docs">
+        <div className={styles.container}>
+          <div className={styles.previewGrid}>
+            <div>
               <p className={styles.sectionKicker}>Product Preview</p>
               <h2>A calm dashboard for real signing work</h2>
               <p className={styles.sectionCopy}>
-                See documents, payments, signers, and verification status in one simple workspace.
+                Keep documents, payments, signers, and verification state in one workspace without hiding your original brand personality.
               </p>
             </div>
-            <div className="col-12 col-lg-7">
-              <div className={styles.dashboardMock}>
-                <div className={styles.dashboardTop}>
-                  <div>
-                    <strong>Documents</strong>
-                    <span>Team workspace</span>
-                  </div>
-                  <div className={styles.connected}>Wallet connected</div>
+            <div className={`${styles.dashboardMock} liquid-glass`}>
+              <div className={styles.dashboardTop}>
+                <div>
+                  <strong>Documents</strong>
+                  <span>Team workspace</span>
                 </div>
-                <div className="row g-3">
-                  <div className="col-12 col-md-7">
-                    <div className={styles.docList}>
-                      {['Creator agreement', 'Rental addendum', 'Invoice approval'].map((item, index) => (
-                        <div className={styles.docRow} key={item}>
-                          <div>
-                            <b>{item}</b>
-                            <span>{index === 0 ? '2 signers waiting' : index === 1 ? 'Signed 12 minutes ago' : 'Hash pending'}</span>
-                          </div>
-                          <em className={index === 0 ? styles.pending : styles.signed}>{index === 0 ? 'Pending' : index === 1 ? 'Signed' : 'Verify'}</em>
-                        </div>
-                      ))}
+                <div className={styles.connected}>Wallet connected</div>
+              </div>
+              <div className={styles.docList}>
+                {['Creator agreement', 'Rental addendum', 'Invoice approval'].map((item, index) => (
+                  <div className={styles.docRow} key={item}>
+                    <div>
+                      <b>{item}</b>
+                      <span>{index === 0 ? '2 signers waiting' : index === 1 ? 'Signed 12 minutes ago' : 'Hash pending'}</span>
                     </div>
+                    <em className={index === 0 ? styles.pending : styles.signed}>{index === 0 ? 'Pending' : index === 1 ? 'Signed' : 'Verify'}</em>
                   </div>
-                  <div className="col-12 col-md-5">
-                    <div className={styles.activityCard}>
-                      <span>Activity</span>
-                      <div className={styles.timeline}>
-                        <i />
-                        <p>Wallet approved payment</p>
-                      </div>
-                      <div className={styles.timeline}>
-                        <i />
-                        <p>Signature added to page 4</p>
-                      </div>
-                      <div className={styles.timeline}>
-                        <i />
-                        <p>Hash queued for Base</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.emptyState}>
-                  <img src="/main_logo.png" alt="" width="44" height="44" />
-                  <span>No documents yet. Your signature assistant is ready.</span>
-                </div>
+                ))}
+              </div>
+              <div className={styles.emptyState}>
+                <img src="/main_logo.png" alt="" width="44" height="44" />
+                <span>Your signature assistant is ready.</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className={styles.section} id="features">
-        <div className="container">
+      <section className={styles.featuresSection} id="features">
+        <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <p className={styles.sectionKicker}>Core Features</p>
             <h2>Crypto-native without the crypto headache</h2>
-            <p>Clear signing, simple payments, and blockchain verification that feels safe and familiar.</p>
+            <p>Clear signing, simple payments, and blockchain verification that still feels friendly.</p>
           </div>
-          <div className="row g-4">
+          <div className={styles.featureGrid}>
             {features.map((feature) => (
-              <div className="col-12 col-md-6 col-xl-4" key={feature.title}>
-                <article className={styles.featureCard}>
-                  <span className={styles.featureIcon}><Icon name={feature.icon} /></span>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.copy}</p>
-                </article>
-              </div>
+              <article className={`${styles.featureCard} liquid-glass`} key={feature.title}>
+                <span className={styles.featureIcon}><Icon name={feature.icon} /></span>
+                <h3>{feature.title}</h3>
+                <p>{feature.copy}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className={styles.flowSection} id="docs">
-        <div className="container">
-          <div className={styles.sectionHeader}>
-            <p className={styles.sectionKicker}>Interactive UX</p>
-            <h2>You already know how to use it</h2>
-            <p>Upload, sign, connect, and verify. Each step keeps blockchain complexity out of the way.</p>
-          </div>
-          <div className="row g-4 align-items-stretch">
-            <div className="col-12 col-lg-4">
-              <div className={styles.flowCard}>
-                <span className={styles.flowStep}>Step 1</span>
-                <div className={styles.dropZone}>
-                  <Icon name="pdf" />
-                  <b>Drop PDF here</b>
-                  <small>or browse from your device</small>
-                </div>
-              </div>
-            </div>
-            <div className="col-12 col-lg-4">
-              <div className={styles.flowCard}>
-                <span className={styles.flowStep}>Step 2</span>
-                <div className={styles.signatureUi}>
-                  <div className={styles.paperLine} />
-                  <div className={styles.paperLineShort} />
-                  <div className={styles.placeBox}>
-                    <span>Signature</span>
-                    <svg viewBox="0 0 210 54" aria-hidden="true">
-                      <path d="M6 35c23-25 38-25 45 0 4 15 21 12 34-9 14-21 29-20 27 1-3 22 30 16 91-11" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-12 col-lg-4">
-              <div className={styles.flowCard}>
-                <span className={styles.flowStep}>Step 3</span>
-                <div className={styles.walletModal}>
-                  <div className={styles.walletHeader}>
-                    <Icon name="wallet" />
-                    <b>MetaMask</b>
-                  </div>
-                  <div className={styles.walletRow}><span>Network</span><b>Base</b></div>
-                  <div className={styles.walletRow}><span>Signing fee</span><b>0.000091 ETH</b></div>
-                  <button type="button">Confirm and sign</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.progressRail} aria-label="Signing progress preview">
-            <span className={styles.progressActive}>Upload</span>
-            <span className={styles.progressActive}>Place signature</span>
-            <span className={styles.progressActive}>Connect wallet</span>
-            <span>Verified</span>
-          </div>
-        </div>
-      </section>
-
       <section className={styles.trustSection}>
-        <div className="container">
-          <div className="row align-items-center gy-4">
-            <div className="col-12 col-lg-5">
+        <div className={styles.container}>
+          <div className={styles.trustGrid}>
+            <div>
               <p className={styles.sectionKicker}>Powered by blockchain security</p>
               <h2>Trust users can verify from day one</h2>
               <p className={styles.sectionCopy}>
-                No inflated startup metrics. Just clear product mechanics users can inspect: payment proof, document hashes, wallet consent, and controlled team access.
+                The new design keeps your own mascot and icon, while the interface focuses on proof, consent, and payment clarity.
               </p>
             </div>
-            <div className="col-12 col-lg-7">
-              <div className="row g-3">
-                {trustCards.map((card) => (
-                  <div className="col-12 col-md-6" key={card.title}>
-                    <div className={styles.trustCard}>
-                      <b>{card.title}</b>
-                      <span>{card.copy}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className={styles.trustCards}>
+              {trustCards.map(([title, copy]) => (
+                <div className={`${styles.trustCard} liquid-glass`} key={title}>
+                  <b>{title}</b>
+                  <span>{copy}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       <section className={styles.pricingSection} id="pricing">
-        <div className="container">
-          <div className="row justify-content-center">
-            <div className="col-12 col-lg-10">
-              <div className={styles.ctaPanel}>
-                <img src="/main_logo.png" alt="" width="92" height="92" />
-                <p className={styles.sectionKicker}>Simple pricing model</p>
-                <h2>Pay per signature, or bring the team</h2>
-                <p>
-                  Individual users pay only when they sign. Teams get a shared workspace with owner-managed access and registration codes.
-                </p>
-                <div className={styles.planGrid}>
-                  {plans.map((plan) => (
-                    <article className={styles.planCard} key={plan.name}>
-                      <div>
-                        <h3>{plan.name}</h3>
-                        <strong>{plan.price}</strong>
-                        <span>{plan.cadence}</span>
-                      </div>
-                      <p>{plan.copy}</p>
-                      <ul>
-                        {plan.bullets.map((bullet) => (
-                          <li key={bullet}>{bullet}</li>
-                        ))}
-                      </ul>
-                    </article>
-                  ))}
-                </div>
-                <div className={styles.heroActions}>
-                  <a className={styles.primaryButton} href="/sign">Start Signing</a>
-                  <a className={styles.secondaryButton} href="/auth/login">Connect Wallet</a>
-                </div>
-                <div className={styles.successState}>Signed successfully. Verification hash saved.</div>
-              </div>
+        <div className={styles.container}>
+          <div className={`${styles.ctaPanel} liquid-glass`}>
+            <img src="/main_logo.png" alt="" width="92" height="92" />
+            <p className={styles.sectionKicker}>Simple pricing model</p>
+            <h2>Pay per signature, then scale into teams</h2>
+            <p>Individual users pay only when they sign. Teams can grow into owner-managed workspace access.</p>
+            <div className={styles.heroActions}>
+              <a className={styles.primaryButton} href="/sign">Start Signing</a>
+              <a className={styles.secondaryButton} href="/auth/login">Connect Wallet</a>
             </div>
           </div>
         </div>
       </section>
-
-      <footer className={styles.footer}>
-        <div className="container">
-          <div className={styles.footerShell}>
-            <a className={styles.footerBrand} href="#top">
-              <img src="/main_logo.png" alt="" width="36" height="36" />
-              SignHere
-            </a>
-            <div>
-              <a href="#docs">Docs</a>
-              <a href="#">Privacy</a>
-              <a href="#">Terms</a>
-              <a href="#">Contact</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   )
 }

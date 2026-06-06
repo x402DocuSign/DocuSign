@@ -6,6 +6,9 @@ import { authenticate, requireMFA, AuthenticatedRequest } from '../middleware/au
 import { idempotencyMiddleware } from '../middleware/idempotency'
 import { auditLog } from '../middleware/audit'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { verifyX402Payment, verifyStellarPayment } = require('@esign/payments') as any
+
 const router: import('express').Router = Router()
 
 // ─── Create Team Subscription ──────────────────────────────────
@@ -17,12 +20,13 @@ router.post(
   idempotencyMiddleware,
   auditLog({ action: 'SUBSCRIPTION_CREATED' }),
   async (req: AuthenticatedRequest, res: Response) => {
-    const { teamId, plan, txHash, walletAddress } = z
+    const { teamId, plan, txHash, walletAddress, paymentNetwork } = z
       .object({
         teamId: z.string(),
         plan: z.enum(['TEAM', 'ENTERPRISE']),
         txHash: z.string(),
         walletAddress: z.string(),
+        paymentNetwork: z.enum(['base', 'stellar']).default('base'),
       })
       .parse(req.body)
 
@@ -40,6 +44,25 @@ router.post(
     periodEnd.setMonth(periodEnd.getMonth() + 1)
 
     const limits = { TEAM: 100, ENTERPRISE: 10000 }
+    const amounts = { TEAM: '0.1', ENTERPRISE: '1.0' }
+    const amount = amounts[plan]
+    const currency = paymentNetwork === 'stellar' ? 'XLM' : 'ETH'
+    const resource = `/api/payments/subscriptions/${teamId}/${plan}`
+    const paymentToken =
+      paymentNetwork === 'stellar'
+        ? `stellar:${txHash}:${walletAddress}:${amount}`
+        : `x402:${txHash}:${walletAddress}:${amount}`
+
+    const verification = paymentNetwork === 'stellar'
+      ? await verifyStellarPayment(paymentToken, resource, amount)
+      : await verifyX402Payment(paymentToken, resource, amount)
+
+    if (!verification.valid) {
+      return res.status(402).json({
+        error: 'Invalid subscription payment',
+        message: verification.error || 'Payment verification failed',
+      })
+    }
 
     const [subscription, payment] = await prisma.$transaction([
       prisma.subscription.create({
@@ -58,11 +81,16 @@ router.post(
           teamId,
           type: 'TEAM_PACKAGE',
           status: 'COMPLETED',
-          amount: plan === 'TEAM' ? '0.1' : '1.0',
-          currency: 'ETH',
-          txHash,
+          amount,
+          currency,
+          txHash: verification.txHash || txHash,
           walletAddress,
           idempotencyKey: req.headers['x-idempotency-key'] as string || uuidv4(),
+          metadata: {
+            paymentNetwork,
+            paymentId: verification.paymentId,
+            verifiedAt: new Date().toISOString(),
+          },
         },
       }),
       prisma.team.update({

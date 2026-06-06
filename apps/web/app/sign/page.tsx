@@ -14,8 +14,8 @@ export default function Home() {
 
           {/* Logo / Brand */}
           <header className={styles.logoZone}>
-            <h1 className={styles.logoLine1}>Build</h1>
-            <h1 className={styles.logoLine2}>Mindz</h1>
+            <h1 className={styles.logoLine1}>Sign</h1>
+            <h1 className={styles.logoLine2}>Here</h1>
           </header>
 
           {/* Rule + Tagline */}
@@ -24,7 +24,7 @@ export default function Home() {
               <span className={styles.ruleFull} />
               <span className={styles.ruleAccent} />
             </div>
-            <p className={styles.tagline}>Secure document signing system.</p>
+            <p className={styles.tagline}>Secure document signing with Base and Stellar testnet verification.</p>
           </div>
 
           {/* Metadata stats */}
@@ -32,18 +32,18 @@ export default function Home() {
             <div className={styles.metaRule} />
             <div className={styles.metaGrid}>
               <div className={styles.metaItem}>
-                <span className={styles.metaKey}>FORM</span>
-                <span className={styles.metaVal}>Document<br />Architecture</span>
+                <span className={styles.metaKey}>FLOW</span>
+                <span className={styles.metaVal}>Upload<br />Prepare</span>
               </div>
               <div className={styles.metaDivider} />
               <div className={styles.metaItem}>
-                <span className={styles.metaKey}>SIGNAL</span>
-                <span className={styles.metaVal}>Commitment<br />&amp; Authority</span>
+                <span className={styles.metaKey}>CHAIN</span>
+                <span className={styles.metaVal}>Base<br />Stellar</span>
               </div>
               <div className={styles.metaDivider} />
               <div className={styles.metaItem}>
-                <span className={styles.metaKey}>GROUND</span>
-                <span className={styles.metaVal}>Ink on<br />Formal Surface</span>
+                <span className={styles.metaKey}>PROOF</span>
+                <span className={styles.metaVal}>Hash<br />Audit Trail</span>
               </div>
             </div>
           </div>
@@ -51,17 +51,17 @@ export default function Home() {
           {/* CTA */}
           <div className={styles.ctaBlock}>
             <a href="/auth/login" className={styles.ctaBtn}>
-              Continue &nbsp;→
+              Continue
             </a>
           </div>
 
           {/* Footer identity */}
           <footer className={styles.footerLeft}>
             <p className={styles.footerLine1}>
-              ESIGN PLATFORM · Document Intelligence · 2026
+              SIGNHERE PLATFORM / DOCUMENT INTELLIGENCE / 2026
             </p>
             <p className={styles.footerLine2}>
-              Identity &amp; Interface Direction — Studio Release
+              Liquid glass interface for trusted digital agreements
             </p>
           </footer>
         </div>
@@ -94,7 +94,7 @@ export default function Home() {
               <div className={styles.ruledLines}>
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className={styles.ruleLine}>
-                    <span className={styles.xMark}>×</span>
+                    <span className={styles.xMark}>x</span>
                     <span className={styles.ruleLineBar} />
                   </div>
                 ))}
@@ -153,7 +153,7 @@ export default function Home() {
         <div className={styles.footerRight}>
           <div className={styles.footerRightRule} />
           <p className={styles.footerRightLabel}>
-            INK COVENANT — Visual System 01 · Form &amp; Authority
+            SIGNHERE / WALLET PAYMENT / DOCUMENT PROOF
           </p>
         </div>
       </main>
