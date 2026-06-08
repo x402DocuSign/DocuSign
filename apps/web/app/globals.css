@@ -1,6 +1,19 @@
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #050505;
+  --foreground: #f7f7f5;
+  --app-bg: #050505;
+  --app-surface: #111111;
+  --app-surface-soft: #171717;
+  --app-text: #f7f7f5;
+  --app-muted: rgba(247, 247, 245, 0.68);
+  --app-dim: rgba(247, 247, 245, 0.44);
+  --app-line: rgba(247, 247, 245, 0.14);
+  --app-panel: rgba(255, 255, 255, 0.07);
+  --app-panel-strong: rgba(255, 255, 255, 0.12);
+  --app-button-bg: #ffffff;
+  --app-button-text: #000000;
+  --app-accent: #53d6c5;
+  --app-warm: #f2b36d;
   --font-body: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: var(--font-serif), Georgia, "Times New Roman", serif;
   --liquid-text: #ffffff;
@@ -10,11 +23,32 @@
   --liquid-panel: rgba(255, 255, 255, 0.04);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html[data-theme='light'] {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #111111;
+  --app-bg: #ffffff;
+  --app-surface: #f6f7f4;
+  --app-surface-soft: #eef1ed;
+  --app-text: #111111;
+  --app-muted: rgba(17, 17, 17, 0.62);
+  --app-dim: rgba(17, 17, 17, 0.42);
+  --app-line: rgba(17, 17, 17, 0.12);
+  --app-panel: rgba(17, 17, 17, 0.04);
+  --app-panel-strong: rgba(17, 17, 17, 0.08);
+  --app-button-bg: #111111;
+  --app-button-text: #ffffff;
+  --app-accent: #087f73;
+  --app-warm: #b86516;
+  --liquid-text: #111111;
+  --liquid-muted: rgba(17, 17, 17, 0.62);
+  --liquid-dim: rgba(17, 17, 17, 0.38);
+  --liquid-line: rgba(17, 17, 17, 0.14);
+  --liquid-panel: rgba(17, 17, 17, 0.04);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 html,
@@ -31,6 +65,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-body);
+  transition: background-color 240ms ease, color 240ms ease;
 }
 
 * {

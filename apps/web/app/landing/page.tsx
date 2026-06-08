@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import styles from './landing.module.css'
 
 const features = [
@@ -28,6 +31,15 @@ const trustCards = [
   ['Document integrity', 'Signed files can be verified by hash while the document itself stays private.'],
   ['Clear consent', 'Users review the document, network, and amount before approving payment.'],
 ]
+
+const workflowTabs = [
+  { id: 'upload', label: 'Upload', icon: 'chart' },
+  { id: 'prepare', label: 'Prepare', icon: 'book' },
+  { id: 'sign', label: 'Sign', icon: 'users' },
+  { id: 'verify', label: 'Verify', icon: 'rocket' },
+] as const
+
+type WorkflowTab = typeof workflowTabs[number]['id']
 
 function Icon({ name }: { name: string }) {
   const common = {
@@ -69,6 +81,59 @@ function Icon({ name }: { name: string }) {
     )
   }
 
+  if (name === 'star') {
+    return (
+      <svg {...common}>
+        <path d="m15 3 3.5 7.1 7.8 1.1-5.7 5.5 1.4 7.8-7-3.7-7 3.7 1.4-7.8-5.7-5.5 7.8-1.1L15 3Z" fill="currentColor" />
+      </svg>
+    )
+  }
+
+  if (name === 'chevron') {
+    return (
+      <svg {...common} width={18} height={18} viewBox="0 0 18 18">
+        <path d="m4.5 6.75 4.5 4.5 4.5-4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+
+  if (name === 'chart') {
+    return (
+      <svg {...common}>
+        <path d="M6 24V12M15 24V6M24 24V15" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        <path d="M4 24h22" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      </svg>
+    )
+  }
+
+  if (name === 'book') {
+    return (
+      <svg {...common}>
+        <path d="M6 5h9a4 4 0 0 1 4 4v16H9a3 3 0 0 0-3 3V5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M19 8h3a2 2 0 0 1 2 2v15h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    )
+  }
+
+  if (name === 'users') {
+    return (
+      <svg {...common}>
+        <path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 25c.7-4.5 3.2-6.8 7.5-6.8s6.8 2.3 7.5 6.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M21 14.8a3.5 3.5 0 1 0-.9-6.8M21.2 18.3c2.8.6 4.5 2.8 5 6.7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    )
+  }
+
+  if (name === 'rocket') {
+    return (
+      <svg {...common}>
+        <path d="M16 5c4.8.4 7.8 3.4 8.2 8.2l-7.8 7.8-7.4-7.4L16 5Z" fill="currentColor" opacity=".16" />
+        <path d="M16 5c4.8.4 7.8 3.4 8.2 8.2l-7.8 7.8-7.4-7.4L16 5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M9 13.5H5.8L3.8 19l5.2-2M16.5 21l-2 5.2 5.5-2v-3.2M17.8 11.3h.1" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+
   return (
     <svg {...common}>
       <path d="M8 3h10l6 6v18H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="currentColor" opacity=".14" />
@@ -79,8 +144,47 @@ function Icon({ name }: { name: string }) {
 }
 
 export default function LandingPage() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [activeTab, setActiveTab] = useState<WorkflowTab>('upload')
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem('signhere-theme')
+    if (storedTheme === 'dark' || storedTheme === 'light') {
+      setTheme(storedTheme)
+      document.documentElement.dataset.theme = storedTheme
+      return
+    }
+
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setTheme('light')
+      document.documentElement.dataset.theme = 'light'
+    } else {
+      document.documentElement.dataset.theme = 'dark'
+    }
+  }, [])
+
+  const toggleTheme = () => {
+    setTheme((currentTheme) => {
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark'
+      window.localStorage.setItem('signhere-theme', nextTheme)
+      document.documentElement.dataset.theme = nextTheme
+      return nextTheme
+    })
+  }
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveTab((currentTab) => {
+        const currentIndex = workflowTabs.findIndex((tab) => tab.id === currentTab)
+        return workflowTabs[(currentIndex + 1) % workflowTabs.length].id
+      })
+    }, 4000)
+
+    return () => window.clearInterval(timer)
+  }, [])
+
   return (
-    <main className={styles.landing} id="top">
+    <main className={styles.landing} data-theme={theme} id="top">
       <nav className={styles.navbar} aria-label="Primary navigation">
         <div className={styles.container}>
           <div className={`${styles.navShell} liquid-glass`}>
@@ -89,11 +193,22 @@ export default function LandingPage() {
               <span>SignHere</span>
             </a>
             <div className={styles.navLinks}>
-              <a href="#features">Features</a>
-              <a href="#pricing">Pricing</a>
+              <a href="#features">Solutions</a>
+              <a href="#pricing">For Teams</a>
               <a href="#docs">Docs</a>
               <a href="/auth/login">Login</a>
             </div>
+            <button
+              className={styles.themeToggle}
+              type="button"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              aria-pressed={theme === 'light'}
+            >
+              <span className={styles.themeTrack} aria-hidden="true">
+                <span className={styles.themeKnob} />
+              </span>
+            </button>
             <a className={styles.navCta} href="/sign">Sign Now</a>
           </div>
         </div>
@@ -101,48 +216,56 @@ export default function LandingPage() {
 
       <section className={styles.hero}>
         <div className={styles.container}>
-          <div className={styles.heroGrid}>
-            <div className={styles.heroCopyBlock}>
-              <p className={styles.eyebrow}>Blockchain e-signatures for real documents</p>
-              <h1>Sign documents smarter, not harder.</h1>
-              <p className={styles.heroCopy}>
-                Secure, fast, wallet-powered signatures for individuals and teams, now supporting Base and Stellar testnet payments.
-              </p>
-              <div className={styles.heroActions}>
-                <a className={styles.primaryButton} href="/sign">Start Signing</a>
-                <a className={styles.secondaryButton} href="/auth/login">Connect Wallet</a>
-              </div>
-              <div className={styles.heroNotes} aria-label="Product highlights">
-                <span>Base payments</span>
-                <span>Stellar testnet</span>
-                <span>Document hash proof</span>
-              </div>
+          <div className={styles.heroShell}>
+            <h1 className={styles.heroTitle} style={{ animationDelay: '0.2s', opacity: 0 }}>
+              Sign Faster. Verify Smarter.
+              <span>Blockchain Powers Trust.</span>
+            </h1>
+
+            <p className={styles.heroCopy} style={{ animationDelay: '0.3s', opacity: 0 }}>
+              Upload, prepare, pay, and sign documents with a clean eSign workflow backed by Base and Stellar testnet verification.
+            </p>
+
+            <div className={styles.heroActions} style={{ animationDelay: '0.4s', opacity: 0 }}>
+              <a className={styles.primaryButton} href="/sign">Start Signing Free</a>
             </div>
 
-            <div className={styles.heroVisual}>
-              <div className={`${styles.documentFloat} liquid-glass`}>
-                <div className={styles.docTop}>
-                  <span>Service Agreement.pdf</span>
-                  <b>Ready</b>
-                </div>
-                <div className={styles.docLines}>
-                  <span />
-                  <span />
-                  <span />
-                </div>
-                <div className={styles.signatureBox}>
-                  <span>Place signature</span>
-                  <svg viewBox="0 0 260 64" aria-hidden="true">
-                    <path d="M9 42c23-30 38-30 45-3 5 19 24 12 39-10 17-25 33-23 28 3-5 25 32 16 128-17" />
-                  </svg>
-                </div>
-              </div>
-              <img className={styles.mascot} src="/main_logo.png" alt="SignHere mascot holding a pen" />
-              <div className={`${styles.verifyBadge} liquid-glass`}>
-                <span className={styles.pulseDot} />
-                Verified on Base
-              </div>
-              <div className={`${styles.walletPill} liquid-glass`}>Freighter ready</div>
+            <div className={styles.workflowTabs} style={{ animationDelay: '0.5s', opacity: 0 }} role="tablist" aria-label="Signing workflow">
+              {workflowTabs.map((tab, index) => (
+                <button
+                  key={tab.id}
+                  className={`${styles.workflowTab} ${activeTab === tab.id ? styles.workflowTabActive : ''}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <Icon name={tab.icon} />
+                  <span>{tab.label}</span>
+                  {index < workflowTabs.length - 1 && <i aria-hidden="true" />}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.heroDemo} style={{ animationDelay: '0.6s', opacity: 0 }}>
+              <video
+                className={styles.demoVideo}
+                src={theme === 'dark' ? '/night_theme.mp4' : '/light_theme.mp4'}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            </div>
+
+            <div className={styles.partnerRow} style={{ animationDelay: '0.7s', opacity: 0 }} aria-label="Supported workflow">
+              <span>PDF</span>
+              <span>Base</span>
+              <span>Stellar</span>
+              <span>Freighter</span>
+              <span>Audit Trail</span>
+              <span>Teams</span>
             </div>
           </div>
         </div>

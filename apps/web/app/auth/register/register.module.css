@@ -521,3 +521,34 @@
 .primaryBtn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.86);
 }
+
+:global(html[data-theme='light']) .page {
+  --warm-white: #ffffff;
+  --text-primary: #111111;
+  --text-secondary: rgba(17, 17, 17, 0.72);
+  --text-muted: rgba(17, 17, 17, 0.54);
+  --text-placeholder: rgba(17, 17, 17, 0.36);
+  background: var(--app-bg);
+  background-image: none;
+}
+
+:global(html[data-theme='light']) .card2 {
+  border-color: rgba(17, 17, 17, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 80px rgba(17, 17, 17, 0.12);
+}
+
+:global(html[data-theme='light']) .right,
+:global(html[data-theme='light']) .input {
+  background: #ffffff;
+}
+
+:global(html[data-theme='light']) .input {
+  color: #111111;
+  border-color: rgba(17, 17, 17, 0.12);
+}
+
+:global(html[data-theme='light']) .primaryBtn {
+  background: #111111;
+  color: #ffffff;
+}

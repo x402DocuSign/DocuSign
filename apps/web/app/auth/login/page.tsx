@@ -7,6 +7,7 @@ import styles from './login.module.css'
 
 /* ─── Types ─────────────────────────────────────────── */
 type Panel = 'login' | 'signup'
+type WalletProvider = 'metamask' | 'freighter'
 
 /* ─── Left panel illustration ───────────────────────── */
 function LeftPanel({ panel }: { panel: Panel }) {
@@ -87,6 +88,9 @@ export default function LoginPage() {
   const [suError,    setSuError]    = useState('')
   const [suLoading,  setSuLoading]  = useState(false)
   const [showPwd,    setShowPwd]    = useState(false)
+  const [walletOpen, setWalletOpen] = useState(false)
+  const [walletError, setWalletError] = useState('')
+  const [walletConnecting, setWalletConnecting] = useState<WalletProvider | null>(null)
 
   /* Switch panel with a slide transition */
   const switchPanel = (to: Panel) => {
@@ -124,6 +128,55 @@ export default function LoginPage() {
     setTimeout(() => {
       router.push('/auth/register')
     }, 380)
+  }
+
+  const connectWallet = async (provider: WalletProvider) => {
+    setWalletError('')
+    setWalletConnecting(provider)
+
+    try {
+      if (provider === 'metamask') {
+        const ethereum = (window as typeof window & {
+          ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> }
+        }).ethereum
+
+        if (!ethereum) {
+          setWalletError('MetaMask was not found. Install the extension and try again.')
+          return
+        }
+
+        await ethereum.request({ method: 'eth_requestAccounts' })
+        setWalletOpen(false)
+        return
+      }
+
+      const freighter = await import('@stellar/freighter-api')
+      const connected = await freighter.isConnected()
+      const isConnected = typeof connected === 'boolean'
+        ? connected
+        : Boolean((connected as { isConnected?: boolean }).isConnected)
+
+      if (!isConnected) {
+        setWalletError('Freighter was not found. Install the extension and try again.')
+        return
+      }
+
+      const allowed = await freighter.isAllowed()
+      const isAllowed = typeof allowed === 'boolean'
+        ? allowed
+        : Boolean((allowed as { isAllowed?: boolean }).isAllowed)
+
+      if (!isAllowed) {
+        await freighter.setAllowed()
+      }
+
+      await freighter.getAddress()
+      setWalletOpen(false)
+    } catch (err) {
+      setWalletError(err instanceof Error ? err.message : 'Wallet connection failed.')
+    } finally {
+      setWalletConnecting(null)
+    }
   }
 
   /* Sign-up submit (stub — wire to your API) */
@@ -246,6 +299,17 @@ export default function LoginPage() {
                 Continue with Google
               </button>
             </div>
+
+            <button
+              type="button"
+              className={styles.walletEntryBtn}
+              onClick={() => {
+                setWalletError('')
+                setWalletOpen(true)
+              }}
+            >
+              Connect wallet
+            </button>
           </div>
 
           {/* ── Sign-up panel ── */}
@@ -327,6 +391,66 @@ export default function LoginPage() {
 
         </div>{/* /right */}
       </div>{/* /card2 */}
+
+      {walletOpen && (
+        <div className={styles.walletOverlay} role="dialog" aria-modal="true" aria-labelledby="wallet-title">
+          <div className={styles.walletDialog}>
+            <button
+              className={styles.walletClose}
+              type="button"
+              aria-label="Close wallet dialog"
+              onClick={() => setWalletOpen(false)}
+            >
+              x
+            </button>
+
+            <div className={styles.walletHeader}>
+              <h2 id="wallet-title">Connect Wallet</h2>
+              <p>
+                Connect a wallet to prepare blockchain payment and verification for document signing.
+              </p>
+            </div>
+
+            {walletError && <div className={styles.walletError}>{walletError}</div>}
+
+            <div className={styles.walletOptions}>
+              <button
+                type="button"
+                className={styles.walletOption}
+                onClick={() => connectWallet('metamask')}
+                disabled={walletConnecting !== null}
+              >
+                <span className={styles.metamaskIcon}>M</span>
+                <span>
+                  <b>MetaMask</b>
+                  <small>Base Sepolia payments</small>
+                </span>
+                {walletConnecting === 'metamask' && <em>Connecting...</em>}
+              </button>
+
+              <button
+                type="button"
+                className={styles.walletOption}
+                onClick={() => connectWallet('freighter')}
+                disabled={walletConnecting !== null}
+              >
+                <span className={styles.freighterIcon}>F</span>
+                <span>
+                  <b>Freighter</b>
+                  <small>Stellar testnet payments</small>
+                </span>
+                {walletConnecting === 'freighter' && <em>Connecting...</em>}
+              </button>
+            </div>
+
+            <div className={styles.walletHelp}>
+              <b>Still not using a crypto wallet?</b>
+              <p>Wallets let you approve Base and Stellar testnet payments before signing documents.</p>
+              <a href="/sign">Learn how signing payments work</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

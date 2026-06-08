@@ -655,3 +655,249 @@
 .orRow::after {
   background: rgba(255, 255, 255, 0.12);
 }
+
+.walletEntryBtn {
+  width: 100%;
+  height: 44px;
+  margin-top: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-input);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.walletEntryBtn:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.walletOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.62);
+  padding: 24px;
+}
+
+.walletDialog {
+  position: relative;
+  width: min(380px, 100%);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: #0d0d0d;
+  color: #ffffff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.walletClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+}
+
+.walletHeader {
+  padding: 36px 28px 18px;
+  text-align: center;
+}
+
+.walletHeader h2 {
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--font);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.walletHeader p {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.walletOptions {
+  display: grid;
+  gap: 10px;
+  padding: 10px 24px 28px;
+}
+
+.walletOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: #171717;
+  padding: 13px 14px;
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.walletOption:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
+.walletOption span:nth-child(2) {
+  flex: 1;
+}
+
+.walletOption b,
+.walletOption small,
+.walletOption em {
+  display: block;
+}
+
+.walletOption b {
+  font-size: 14px;
+}
+
+.walletOption small,
+.walletOption em {
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.metamaskIcon,
+.freighterIcon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.metamaskIcon {
+  background: linear-gradient(135deg, #f6851b, #e2761b);
+}
+
+.freighterIcon {
+  background: linear-gradient(135deg, #4b7cff, #5436d8);
+}
+
+.walletError {
+  margin: 0 24px 6px;
+  border: 1px solid rgba(255, 86, 86, 0.35);
+  border-radius: 8px;
+  background: rgba(255, 86, 86, 0.1);
+  color: #ffb5b5;
+  padding: 9px 11px;
+  font-size: 12px;
+}
+
+.walletHelp {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 22px 24px 24px;
+}
+
+.walletHelp b {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.walletHelp p {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.walletHelp a {
+  display: inline-block;
+  margin-top: 6px;
+  color: #6f8cff;
+  font-size: 13px;
+}
+
+:global(html[data-theme='light']) .page {
+  --warm-white: #ffffff;
+  --text-primary: #111111;
+  --text-secondary: rgba(17, 17, 17, 0.72);
+  --text-muted: rgba(17, 17, 17, 0.54);
+  --text-placeholder: rgba(17, 17, 17, 0.36);
+  background: var(--app-bg);
+  background-image: none;
+}
+
+:global(html[data-theme='light']) .card2 {
+  border-color: rgba(17, 17, 17, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 80px rgba(17, 17, 17, 0.12);
+}
+
+:global(html[data-theme='light']) .right,
+:global(html[data-theme='light']) .socialBtn,
+:global(html[data-theme='light']) .input,
+:global(html[data-theme='light']) .walletEntryBtn {
+  background: #ffffff;
+}
+
+:global(html[data-theme='light']) .input,
+:global(html[data-theme='light']) .socialBtn,
+:global(html[data-theme='light']) .walletEntryBtn {
+  color: #111111;
+  border-color: rgba(17, 17, 17, 0.12);
+}
+
+:global(html[data-theme='light']) .primaryBtn {
+  background: #111111;
+  color: #ffffff;
+}
+
+:global(html[data-theme='light']) .walletOverlay {
+  background: rgba(17, 17, 17, 0.14);
+}
+
+:global(html[data-theme='light']) .walletDialog {
+  border-color: rgba(17, 17, 17, 0.08);
+  background: #ffffff;
+  color: #111111;
+}
+
+:global(html[data-theme='light']) .walletHeader h2,
+:global(html[data-theme='light']) .walletOption,
+:global(html[data-theme='light']) .walletHelp b {
+  color: #111111;
+}
+
+:global(html[data-theme='light']) .walletHeader p,
+:global(html[data-theme='light']) .walletOption small,
+:global(html[data-theme='light']) .walletOption em,
+:global(html[data-theme='light']) .walletHelp p {
+  color: rgba(17, 17, 17, 0.56);
+}
+
+:global(html[data-theme='light']) .walletClose {
+  background: rgba(17, 17, 17, 0.05);
+  color: rgba(17, 17, 17, 0.54);
+}
+
+:global(html[data-theme='light']) .walletOption {
+  background: #f8f8f8;
+}
+
+:global(html[data-theme='light']) .walletHelp {
+  border-top-color: rgba(17, 17, 17, 0.08);
+}

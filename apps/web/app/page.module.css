@@ -617,3 +617,50 @@
 .topRuleRight {
   background: rgba(255, 255, 255, 0.22);
 }
+
+:global(html[data-theme='light']) .page {
+  --ink-black: #111111;
+  --ink-deep: #ffffff;
+  --ink-card-1: rgba(17, 17, 17, 0.08);
+  --ink-card-2: rgba(17, 17, 17, 0.12);
+  --ink-card-3: rgba(17, 17, 17, 0.16);
+  --ink-card-hero: rgba(17, 17, 17, 0.08);
+  --ink-border: rgba(17, 17, 17, 0.28);
+  --ink-rule: rgba(17, 17, 17, 0.2);
+  --ink-tick: rgba(17, 17, 17, 0.16);
+  --warm-white: #ffffff;
+  --warm-off: rgba(17, 17, 17, 0.06);
+  --warm-grid: rgba(17, 17, 17, 0.08);
+  --text-primary: #111111;
+  --text-secondary: rgba(17, 17, 17, 0.72);
+  --text-muted: rgba(17, 17, 17, 0.58);
+  --text-ghost: rgba(17, 17, 17, 0.42);
+  --text-right: #111111;
+  --text-here: rgba(17, 17, 17, 0.58);
+  --text-rule: rgba(17, 17, 17, 0.48);
+  --meta-key-color: #111111;
+  --meta-val-color: rgba(17, 17, 17, 0.62);
+  --meta-div-color: rgba(17, 17, 17, 0.14);
+  background: var(--app-bg);
+  color: #111111;
+}
+
+:global(html[data-theme='light']) .left,
+:global(html[data-theme='light']) .right {
+  background: #ffffff;
+}
+
+:global(html[data-theme='light']) .ctaBtn {
+  border-color: rgba(17, 17, 17, 0.18);
+  background: #111111;
+  color: #ffffff;
+  box-shadow: 0 18px 60px rgba(17, 17, 17, 0.12);
+}
+
+:global(html[data-theme='light']) .ruleLineBar,
+:global(html[data-theme='light']) .cardDivider,
+:global(html[data-theme='light']) .footerRightRule,
+:global(html[data-theme='light']) .topRule,
+:global(html[data-theme='light']) .topRuleRight {
+  background: rgba(17, 17, 17, 0.18);
+}

@@ -70,3 +70,37 @@
   .left  { flex: 0 0 120px; }
   .right { padding: 28px 24px; }
 }
+
+:global(html[data-theme='dark']) .page {
+  background: #000000;
+  background-image: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.04), transparent 62%);
+}
+
+:global(html[data-theme='dark']) .card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+:global(html[data-theme='dark']) .title {
+  color: #ffffff;
+}
+
+:global(html[data-theme='dark']) .body,
+:global(html[data-theme='dark']) .support,
+:global(html[data-theme='dark']) .ghostBtn {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+:global(html[data-theme='dark']) .primaryBtn {
+  background: #ffffff;
+  color: #000000;
+}
+
+:global(html[data-theme='dark']) .supportLink {
+  color: #ffffff;
+}
+
+:global(html[data-theme='light']) .page {
+  background: #ffffff;
+  background-image: none;
+}
